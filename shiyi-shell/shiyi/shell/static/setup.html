@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>史佚 ShiYi - 初次配置</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#0d0d0d;color:#d4d4d4;display:flex;justify-content:center;padding:32px 16px}
+.page{width:100%;max-width:600px}
+
+/* tabs */
+.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid #222}
+.tab{padding:10px 28px;border:none;background:none;color:#555;font-size:14px;cursor:default;border-bottom:2px solid transparent;transition:.2s}
+.tab.active{color:#ddd;border-bottom-color:#3b82f6}
+
+/* module card */
+.mod{margin-bottom:14px;background:#141414;border:1px solid #1f1f1f;border-radius:10px;padding:20px}
+.mod-hd{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
+.mod-hd h3{font-size:15px;font-weight:600;color:#e4e4e4}
+.mod-hd .badge{font-size:11px;color:#ef4444;font-weight:600}
+.mod-hd .note{font-size:12px;color:#555;margin-left:auto}
+
+/* field label */
+.fl{font-size:12px;color:#777;margin-bottom:5px;margin-top:12px}
+.fl:first-of-type{margin-top:0}
+
+/* inputs */
+input[type=password],input[type=text]{width:100%;padding:9px 10px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:6px;color:#d4d4d4;font-size:13px;outline:none;font-family:monospace;transition:border-color .2s}
+input:focus{border-color:#555}
+
+select{width:100%;padding:9px 10px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:6px;color:#d4d4d4;font-size:13px;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23777' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;cursor:pointer;transition:border-color .2s}
+select:focus{border-color:#555}
+select:disabled{opacity:.5;cursor:default}
+
+/* ── Provider Picker ── */
+.pvd{position:relative}
+.pvd-btn{width:100%;padding:9px 30px 9px 10px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:6px;color:#d4d4d4;font-size:13px;text-align:left;cursor:pointer;transition:border-color .2s;font-family:inherit;display:flex;align-items:center;gap:8px}
+.pvd-btn:hover{border-color:#444}
+.pvd-btn .arr{color:#666;font-size:10px;margin-left:auto;position:absolute;right:10px}
+.pvd-drop{display:none;position:absolute;top:100%;left:0;right:0;background:#1c1c1c;border:1px solid #333;border-radius:6px;margin-top:4px;z-index:50;max-height:260px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.pvd-drop.open{display:block}
+.pvd-opt{padding:10px 12px;cursor:pointer;transition:background .15s;border-bottom:1px solid #252525}
+.pvd-opt:last-child{border-bottom:none}
+.pvd-opt:hover{background:#252525}
+.pvd-opt .opt-name{font-size:13px;font-weight:600;color:#d4d4d4}
+.pvd-opt .opt-url{font-size:11px;color:#666;margin-top:2px;font-family:monospace}
+.pvd-opt .opt-models{font-size:11px;color:#555;margin-top:1px;font-family:monospace}
+.pvd-opt.selected{background:#1a2a3a;border-left:2px solid #3b82f6}
+
+/* ── Detail Area ── */
+.detail{padding:10px 12px;background:#111;border-radius:6px;font-size:12px;margin-bottom:12px}
+.d-row{display:flex;align-items:baseline;margin-bottom:4px}
+.d-row:last-child{margin-bottom:0}
+.d-lbl{color:#555;min-width:60px;flex-shrink:0}
+.d-val{color:#888;font-family:monospace;font-size:11px}
+.d-input{flex:1;padding:6px 8px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:4px;color:#d4d4d4;font-family:monospace;font-size:11px;outline:none}
+.d-input:focus{border-color:#555}
+
+/* ── Light model follow banner ── */
+.follow-banner{font-size:12px;color:#666;padding:8px 0 0 0}
+
+/* ── Fallback collapsed ── */
+.mod-fb{cursor:pointer;margin-bottom:14px;background:#141414;border:1px solid #1f1f1f;border-radius:10px;padding:14px 20px;transition:background .2s}
+.mod-fb:hover{background:#181818}
+.fb-hd{display:flex;align-items:center;gap:8px}
+.fb-hd h3{font-size:15px;font-weight:600;color:#e4e4e4}
+.fb-badge{font-size:11px;color:#f59e0b;font-weight:500}
+.fb-arr{font-size:10px;color:#666;margin-left:auto}
+.fb-body{display:none;margin-top:10px;font-size:12px;color:#777;line-height:1.6}
+.fb-body.open{display:block}
+
+/* Save */
+.save-row{text-align:right;margin-top:8px}
+.btn-save{padding:11px 36px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-save:hover{background:#2563eb}
+.btn-save:disabled{opacity:.5;cursor:default}
+
+/* Status */
+.status{margin-top:12px;padding:10px;border-radius:6px;font-size:13px;text-align:center;display:none}
+.status.ok{display:block;background:#0a2a0a;color:#4c4;border:1px solid #1a4a1a}
+.status.err{display:block;background:#2a0a0a;color:#e44;border:1px solid #4a1a1a}
+
+/* hint */
+.hint{font-size:11px;color:#444;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- tabs -->
+<div class="tabs">
+  <div class="tab">对话</div>
+  <div class="tab">吏员</div>
+  <div class="tab active">API</div>
+</div>
+
+<!-- ═══ Module 1: 主模型 ═══ -->
+<div class="mod">
+  <div class="mod-hd">
+    <h3>主模型</h3><span class="badge">必填</span>
+    <span class="note">核心对话模型</span>
+  </div>
+
+  <div class="fl">模型供应商</div>
+  <div class="pvd" id="pvd-main">
+    <button type="button" class="pvd-btn" onclick="togglePvd('main')">
+      <span id="main-pvd-name">DeepSeek</span><span class="arr">▾</span>
+    </button>
+    <div class="pvd-drop" id="main-drop"></div>
+  </div>
+
+  <div class="detail" id="main-detail">
+    <div class="d-row"><span class="d-lbl">API 地址</span><span class="d-val" id="main-url">https://api.deepseek.com/v1</span></div>
+    <div class="d-row"><span class="d-lbl">可用模型</span><span class="d-val" id="main-models">deepseek-v4-pro / deepseek-v4-flash / deepseek-chat</span></div>
+  </div>
+  <input type="hidden" id="main-custom-url" value="">
+  <input type="hidden" id="main-custom" value="0">
+
+  <div class="fl">模型选择</div>
+  <select id="main-model"></select>
+
+  <div class="fl">API Key</div>
+  <input type="password" id="main-key" placeholder="sk-..." autocomplete="off">
+</div>
+
+<!-- ═══ Module 2: Embedding ═══ -->
+<div class="mod">
+  <div class="mod-hd">
+    <h3>Embedding 模型</h3><span class="badge">必填</span>
+    <span class="note">向量化模型</span>
+  </div>
+
+  <div class="fl">模型供应商</div>
+  <div class="pvd" id="pvd-emb">
+    <button type="button" class="pvd-btn" onclick="togglePvd('emb')">
+      <span id="emb-pvd-name">硅基流动</span><span class="arr">▾</span>
+    </button>
+    <div class="pvd-drop" id="emb-drop"></div>
+  </div>
+
+  <div class="detail" id="emb-detail">
+    <div class="d-row"><span class="d-lbl">API 地址</span><span class="d-val" id="emb-url">https://api.siliconflow.cn/v1</span></div>
+    <div class="d-row"><span class="d-lbl">可用模型</span><span class="d-val" id="emb-models">BAAI/bge-m3 / BAAI/bge-large-zh-v1.5</span></div>
+  </div>
+  <input type="hidden" id="emb-custom-url" value="">
+  <input type="hidden" id="emb-custom" value="0">
+
+  <div class="fl">模型选择</div>
+  <select id="emb-model"></select>
+
+  <div class="fl">API Key</div>
+  <input type="password" id="emb-key" placeholder="sk-..." autocomplete="off">
+</div>
+
+<!-- ═══ Module 3: 加速模型 ═══ -->
+<div class="mod">
+  <div class="mod-hd">
+    <h3>加速模型</h3>
+    <span class="note">轻量级模型，提升响应速度</span>
+  </div>
+
+  <div class="fl">模型供应商</div>
+  <div class="pvd" id="pvd-light">
+    <button type="button" class="pvd-btn" onclick="togglePvd('light')">
+      <span id="light-pvd-name">跟随主模型 (DeepSeek)</span><span class="arr">▾</span>
+    </button>
+    <div class="pvd-drop" id="light-drop"></div>
+  </div>
+
+  <div class="detail" id="light-detail">
+    <div class="d-row"><span class="d-lbl">API 地址</span><span class="d-val" id="light-url">跟随主模型</span></div>
+    <div class="d-row"><span class="d-lbl">可用模型</span><span class="d-val" id="light-models">deepseek-v4-flash / deepseek-chat</span></div>
+  </div>
+  <input type="hidden" id="light-custom-url" value="">
+  <input type="hidden" id="light-custom" value="0">
+
+  <div class="fl">模型选择</div>
+  <select id="light-model"></select>
+
+  <div class="fl">API Key <span style="font-weight:400;color:#555">（可选，留空则继承主模型 Key）</span></div>
+  <input type="password" id="light-key" placeholder="留空则使用主模型 Key" autocomplete="off">
+</div>
+
+<!-- ═══ Module 4: Fallback (collapsed) ═══ -->
+<div class="mod-fb" id="fb-card" onclick="toggleFallback(event)">
+  <div class="fb-hd">
+    <h3>备用模型</h3>
+    <span class="fb-arr" id="fb-arr">▶</span>
+  </div>
+  <div class="fb-body" id="fb-body">
+    <div class="fl">模型供应商</div>
+    <div class="pvd" id="pvd-fb">
+      <button type="button" class="pvd-btn" onclick="togglePvd('fb');event.stopPropagation()">
+        <span id="fb-pvd-name">选择供应商</span><span class="arr">▾</span>
+      </button>
+      <div class="pvd-drop" id="fb-drop"></div>
+    </div>
+
+    <div class="detail" id="fb-detail">
+      <div class="d-row"><span class="d-lbl">API 地址</span><span class="d-val" id="fb-url">—</span></div>
+      <div class="d-row"><span class="d-lbl">可用模型</span><span class="d-val" id="fb-models">—</span></div>
+    </div>
+    <input type="hidden" id="fb-custom-url" value="">
+    <input type="hidden" id="fb-custom" value="0">
+
+    <div class="fl">模型选择</div>
+    <select id="fb-model"></select>
+
+    <div class="fl">API Key <span style="font-weight:400;color:#555">（可选，留空则继承主模型 Key）</span></div>
+    <input type="password" id="fb-key" placeholder="留空则使用主模型 Key" autocomplete="off">
+  </div>
+</div>
+
+<div class="save-row">
+  <button class="btn-save" id="saveBtn" onclick="save()">保存并启动</button>
+</div>
+<div class="status" id="status"></div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// Provider data
+// ═══════════════════════════════════════
+const PROVIDERS = {
+  'DeepSeek':   { base_url:'https://api.deepseek.com/v1',   models:['deepseek-v4-pro','deepseek-v4-flash','deepseek-chat'], fast:'deepseek-v4-flash' },
+  'Kimi':       { base_url:'https://api.moonshot.cn/v1',     models:['kimi-k2.6','moonshot-v1-8k','moonshot-v1-32k','moonshot-v1-128k'], fast:'moonshot-v1-8k' },
+  '火山引擎':   { base_url:'https://ark.cn-beijing.volces.com/api/v3', models:['doubao-pro-32k','doubao-lite-32k'], fast:'doubao-lite-32k' },
+  '硅基流动':   { base_url:'https://api.siliconflow.cn/v1',  models:['deepseek-ai/DeepSeek-V3','Qwen/Qwen3-235B-A22B'], emb_models:['BAAI/bge-m3','BAAI/bge-large-zh-v1.5'], fast:'Qwen/Qwen3-235B-A22B' },
+};
+
+// ═══════════════════════════════════════
+// State
+// ═══════════════════════════════════════
+let state = {
+  main:      { provider:'DeepSeek', model:'deepseek-v4-pro', custom:false, customUrl:'' },
+  emb:       { provider:'硅基流动', model:'BAAI/bge-m3',      custom:false, customUrl:'' },
+  light:     { provider:'follow',   model:'deepseek-v4-flash', custom:false, customUrl:'' },
+  fb:        { provider:'',         model:'',                  custom:false, customUrl:'', enabled:false },
+};
+
+function providerOpts(module) {
+  if (module === 'fb') {
+    return Object.keys(PROVIDERS).map(k => ({key:k, name:k})).concat([{key:'custom', name:'自定义'}]);
+  }
+  if (module === 'light') {
+    const mainName = state.main.provider;
+    return [{key:'follow', name:'跟随主模型 ('+mainName+')'}].concat(
+      Object.keys(PROVIDERS).map(k => ({key:k, name:k})).concat([{key:'custom', name:'自定义'}])
+    );
+  }
+  return Object.keys(PROVIDERS).map(k => ({key:k, name:k})).concat([{key:'custom', name:'自定义'}]);
+}
+
+function buildDrop(module) {
+  const drop = document.getElementById(module+'-drop');
+  const st = state[module];
+  const opts = providerOpts(module);
+  drop.innerHTML = opts.map(o => {
+    const sel = (st.provider === o.key ? ' selected' : '');
+    if (o.key === 'custom') {
+      return `<div class="pvd-opt${sel}" onclick="selectPvd('${module}','custom')"><span class="opt-name">自定义</span><span class="opt-url" style="color:#555">手动填写 API 地址和模型</span></div>`;
+    }
+    if (o.key === 'follow') {
+      return `<div class="pvd-opt${sel}" onclick="selectPvd('${module}','follow')"><span class="opt-name">${o.name}</span></div>`;
+    }
+    const p = PROVIDERS[o.key];
+    if (!p) return '';
+    const displayModels = (module === 'emb' && p.emb_models) ? p.emb_models : p.models;
+    return `<div class="pvd-opt${sel}" onclick="selectPvd('${module}','${o.key}')">
+      <div class="opt-name">${o.key}</div>
+      <div class="opt-url">${p.base_url}</div>
+      <div class="opt-models">${displayModels.join(' / ')}</div>
+    </div>`;
+  }).join('');
+}
+
+function togglePvd(module) {
+  // Close all others
+  document.querySelectorAll('.pvd-drop.open').forEach(d => {
+    if (d.id !== module+'-drop') d.classList.remove('open');
+  });
+  buildDrop(module);
+  document.getElementById(module+'-drop').classList.toggle('open');
+}
+
+function selectPvd(module, key) {
+  const nameEl = document.getElementById(module+'-pvd-name');
+  const st = state[module];
+  st.provider = key;
+
+  if (module === 'fb') {
+    st.enabled = true;
+  }
+
+  if (key === 'follow') {
+    const mainName = state.main.provider;
+    nameEl.textContent = '跟随主模型 (' + mainName + ')';
+    st.custom = false;
+    st.customUrl = '';
+    document.getElementById(module+'-custom').value = '0';
+    document.getElementById(module+'-custom-url').value = '';
+    // Show follow detail
+    document.getElementById(module+'-url').textContent = '跟随主模型';
+    // Models: fast models from main provider
+    const mp = PROVIDERS[mainName];
+    const fastModels = mp ? (mp.models.filter(m => m !== 'deepseek-v4-pro' && m !== 'kimi-k2.6' && m !== 'doubao-pro-32k' && m !== 'deepseek-ai/DeepSeek-V3')) : [];
+    document.getElementById(module+'-models').textContent = fastModels.length ? fastModels.join(' / ') : '—';
+    document.getElementById(module+'-detail').classList.remove('custom');
+    document.getElementById(module+'-detail').innerHTML = buildDetailHTML(module, '跟随主模型', fastModels.join(' / ') || '—');
+  } else if (key === 'custom') {
+    nameEl.textContent = '自定义';
+    st.custom = true;
+    st.customUrl = '';
+    document.getElementById(module+'-custom').value = '1';
+    // Editable detail
+    document.getElementById(module+'-detail').classList.add('custom');
+    document.getElementById(module+'-detail').innerHTML = buildCustomDetailHTML(module);
+  } else {
+    nameEl.textContent = key;
+    st.custom = false;
+    st.customUrl = '';
+    document.getElementById(module+'-custom').value = '0';
+    document.getElementById(module+'-custom-url').value = '';
+    const p = PROVIDERS[key];
+    const modelsText = (module === 'emb' && p.emb_models) ? p.emb_models.join(' / ') : p.models.join(' / ');
+    document.getElementById(module+'-detail').classList.remove('custom');
+    document.getElementById(module+'-detail').innerHTML = buildDetailHTML(module, p.base_url, modelsText);
+  }
+
+  // Close dropdown
+  document.getElementById(module+'-drop').classList.remove('open');
+  // Update model select
+  updateModelSelect(module);
+}
+
+function buildDetailHTML(module, url, models) {
+  return `<div class="d-row"><span class="d-lbl">API 地址</span><span class="d-val" id="${module}-url">${url}</span></div>
+          <div class="d-row"><span class="d-lbl">可用模型</span><span class="d-val" id="${module}-models">${models}</span></div>`;
+}
+
+function buildCustomDetailHTML(module) {
+  return `<div class="d-row"><span class="d-lbl">API 地址</span><input class="d-input" id="${module}-custom-url-input" placeholder="https://..." onchange="onCustomUrlChange('${module}')"></div>`;
+}
+
+function onCustomUrlChange(module) {
+  const inp = document.getElementById(module+'-custom-url-input');
+  state[module].customUrl = inp.value;
+  document.getElementById(module+'-custom-url').value = inp.value;
+}
+
+function updateModelSelect(module) {
+  const sel = document.getElementById(module+'-model');
+  const st = state[module];
+  let models = [];
+
+  if (module === 'emb') {
+    // Embedding 模块只显示可 embedding 的模型
+    const p = PROVIDERS[st.provider];
+    if (st.provider === 'custom') {
+      sel.innerHTML = '<option value="">自定义 — 下方手动填写</option>';
+      return;
+    }
+    if (p && p.emb_models) {
+      models = p.emb_models;
+    }
+  } else if (module === 'light' && st.provider === 'follow') {
+    // Models from main provider (fast/small ones)
+    const mp = PROVIDERS[state.main.provider];
+    if (mp) {
+      models = mp.models.slice(); // all models, but mark fast one
+    }
+  } else if (st.provider === 'custom') {
+    sel.innerHTML = '<option value="">自定义 — 下方手动填写</option>';
+    return;
+  } else {
+    const p = PROVIDERS[st.provider];
+    if (p) models = p.models;
+  }
+
+  const prev = st.model;
+  sel.innerHTML = models.map(m => {
+    let label = m;
+    // Mark fast model
+    if (module === 'light' && st.provider !== 'custom') {
+      const mp = PROVIDERS[st.provider === 'follow' ? state.main.provider : st.provider];
+      if (mp && m === mp.fast) label = m + ' (推荐)';
+    }
+    return `<option value="${m}"${m === prev ? ' selected' : ''}>${label}</option>`;
+  }).join('') + '<option value="custom">自定义</option>';
+
+  // Auto-select fast model for light if following main
+  if (module === 'light' && st.provider === 'follow') {
+    const mp = PROVIDERS[state.main.provider];
+    if (mp && mp.fast) {
+      sel.value = mp.fast;
+      st.model = mp.fast;
+    }
+  }
+}
+
+// Update light model when main provider changes
+function onMainProviderChange() {
+  if (state.light.provider === 'follow') {
+    document.getElementById('light-pvd-name').textContent = '跟随主模型 (' + state.main.provider + ')';
+    updateModelSelect('light');
+    // Update detail
+    const mp = PROVIDERS[state.main.provider];
+    if (mp) {
+      const fastModels = mp.models.filter(m => m !== 'deepseek-v4-pro' && m !== 'kimi-k2.6' && m !== 'doubao-pro-32k' && m !== 'deepseek-ai/DeepSeek-V3');
+      document.getElementById('light-detail').innerHTML = buildDetailHTML('light', '跟随主模型', fastModels.join(' / ') || '—');
+    }
+  }
+}
+
+// Wrap selectPvd for main to trigger light update
+const origMainSelect = selectPvd;
+selectPvd = function(module, key) {
+  origMainSelect(module, key);
+  if (module === 'main') onMainProviderChange();
+};
+
+// Init
+function initModels() {
+  updateModelSelect('main');
+  updateModelSelect('emb');
+  updateModelSelect('light');
+  updateModelSelect('fb');
+}
+initModels();
+
+// ═══════════════════════════════════════
+// Collapse/expand fallback
+// ═══════════════════════════════════════
+function toggleFallback(e) {
+  if (e && (e.target.closest('.pvd-btn') || e.target.closest('.pvd-drop'))) return;
+  const body = document.getElementById('fb-body');
+  const arr = document.getElementById('fb-arr');
+  body.classList.toggle('open');
+  arr.textContent = body.classList.contains('open') ? '▼' : '▶';
+}
+
+// ═══════════════════════════════════════
+// Close dropdowns on outside click
+// ═══════════════════════════════════════
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.pvd-btn') && !e.target.closest('.pvd-drop')) {
+    document.querySelectorAll('.pvd-drop.open').forEach(d => d.classList.remove('open'));
+  }
+});
+
+// ═══════════════════════════════════════
+// Save
+// ═══════════════════════════════════════
+function getUrl(module) {
+  const st = state[module];
+  if (module === 'fb' && !st.enabled) return '';
+  if (module === 'light' && st.provider === 'follow') return '';
+  if (st.custom) {
+    const inp = document.getElementById(module+'-custom-url-input');
+    return inp ? inp.value.trim() : st.customUrl;
+  }
+  const p = PROVIDERS[st.provider];
+  return p ? p.base_url : '';
+}
+
+function getModel(module) {
+  const sel = document.getElementById(module+'-model');
+  if (sel.value === 'custom') return '';
+  return sel.value;
+}
+
+async function save() {
+  const btn = document.getElementById('saveBtn');
+  const status = document.getElementById('status');
+  status.className = 'status';
+
+  const mainKey = document.getElementById('main-key').value.trim();
+  const embKey = document.getElementById('emb-key').value.trim();
+  const mainKeyPlaceholder = document.getElementById('main-key').placeholder;
+  const embKeyPlaceholder = document.getElementById('emb-key').placeholder;
+
+  // 如果 placeholder 显示"已配置"（说明已有旧 Key），允许留空
+  const mainKeyOK = mainKey || mainKeyPlaceholder.includes('已配置');
+  const embKeyOK = embKey || embKeyPlaceholder.includes('已配置');
+
+  if (!mainKeyOK || !embKeyOK) {
+    status.textContent = '请填写主模型和 Embedding 的 API Key';
+    status.className = 'status err';
+    return;
+  }
+
+  const mainModel = getModel('main');
+  const embModel = getModel('emb');
+  const lightModel = getModel('light');
+  if (!mainModel || !embModel || !lightModel) {
+    status.textContent = '请选择所有模型';
+    status.className = 'status err';
+    return;
+  }
+
+  const lightKey = document.getElementById('light-key').value.trim();
+  const lightUrl = getUrl('light');
+
+  // Fallback (optional)
+  const fbModel = state.fb.enabled ? getModel('fb') : '';
+  const fbKey = state.fb.enabled ? document.getElementById('fb-key').value.trim() : '';
+  const fbUrl = getUrl('fb');
+
+  btn.disabled = true;
+  btn.textContent = '保存中…';
+
+  try {
+    const payload = {
+      main_key: mainKey,
+      embedding_key: embKey,
+      main_model: mainModel,
+      main_base_url: getUrl('main'),
+      embedding_model: embModel,
+      embedding_base_url: getUrl('emb'),
+      light_model: lightModel,
+      light_key: lightKey,
+      light_base_url: lightUrl,
+      fallback_model: fbModel,
+      fallback_key: fbKey,
+      fallback_base_url: fbUrl,
+    };
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (res.ok && data.status === 'ok') {
+      status.textContent = '配置已保存，跳转中…';
+      status.className = 'status ok';
+      setTimeout(() => { window.location.href = '/'; }, 800);
+    } else {
+      status.textContent = data.message || data.detail || '保存失败';
+      status.className = 'status err';
+    }
+  } catch (err) {
+    status.textContent = '网络错误: ' + err.message;
+    status.className = 'status err';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '保存并启动';
+  }
+}
+
+// Prefill from existing config
+(async function prefill() {
+  try {
+    const r = await fetch('/api/config');
+    const d = await r.json();
+    if (d.main.key_set) document.getElementById('main-key').placeholder = '已配置 (●●●)';
+    if (d.embedding.key_set) document.getElementById('emb-key').placeholder = '已配置 (●●●)';
+    if (d.light.key_set) document.getElementById('light-key').placeholder = '已配置 (●●●)';
+    if (d.fallback && d.fallback.key_set) document.getElementById('fb-key').placeholder = '已配置 (●●●)';
+    // Prefill models
+    if (d.main.model) state.main.model = d.main.model;
+    if (d.embedding.model) state.emb.model = d.embedding.model;
+    if (d.light.model) state.light.model = d.light.model;
+    if (d.fallback && d.fallback.model) { state.fb.model = d.fallback.model; state.fb.enabled = true; }
+    updateModelSelect('main');
+    updateModelSelect('emb');
+    updateModelSelect('light');
+    updateModelSelect('fb');
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>

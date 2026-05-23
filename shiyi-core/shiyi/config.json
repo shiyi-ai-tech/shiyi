@@ -1,0 +1,24 @@
+{
+  "version": "0.11.0",
+  "features": {
+    "memory": true,
+    "actions": false,
+    "knowledge_base": false,
+    "web_chat": false
+  },
+  "memory": {
+    "halflife_days": 60,
+    "emotion_multiplier": 1.5,
+    "access_multiplier": 2.0,
+    "max_hops": 2,
+    "decay_per_hop": 0.5,
+    "hot_capacity": 50,
+    "warm_capacity": 500,
+    "embedding_model": "BAAI/bge-m3",
+    "embedding_base": "https://api.siliconflow.cn/v1"
+  },
+  "llm": {
+    "intent_model": "deepseek-v4-flash",
+    "intent_base": "https://api.deepseek.com"
+  }
+}

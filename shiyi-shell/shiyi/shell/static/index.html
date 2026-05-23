@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>史佚 ShiYi</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#111;color:#e0e0e0;display:flex;height:100vh;overflow:hidden}
+
+/* ═══ 左侧边栏 ═══ */
+.sidebar{width:240px;min-width:240px;background:#0d0d0d;border-right:1px solid #1f1f1f;display:flex;flex-direction:column}
+.sidebar-header{padding:12px 14px;border-bottom:1px solid #1f1f1f;display:flex;align-items:center;gap:8px}
+.sidebar-header .dot{width:8px;height:8px;border-radius:50%;background:#4ade80;flex-shrink:0}
+.sidebar-header .title{font-size:14px;font-weight:600;flex:1}
+.sidebar-header .btn-new{background:#2563eb;color:#fff;border:none;width:28px;height:28px;border-radius:6px;font-size:18px;cursor:pointer;line-height:1;transition:background .2s;flex-shrink:0}
+.sidebar-header .btn-new:hover{background:#1d4ed8}
+.sidebar-header .btn-new:disabled{opacity:.4;cursor:default}
+.sidebar-header .gear-btn{background:none;border:none;color:#666;font-size:16px;cursor:pointer;padding:2px;border-radius:4px;transition:color .2s}
+.sidebar-header .gear-btn:hover{color:#ccc}
+
+.session-list{flex:1;overflow-y:auto;padding:6px}
+.session-item{padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s;position:relative;margin-bottom:2px}
+.session-item:hover{background:#1a1a1a}
+.session-item.active{background:#1a2a3a;border-left:2px solid #3b82f6}
+.session-item .s-name{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.session-item .s-count{font-size:10px;color:#555;flex-shrink:0}
+.session-item .s-actions{display:none;gap:2px;flex-shrink:0}
+.session-item:hover .s-actions{display:flex}
+.s-actions button{background:none;border:none;color:#555;font-size:12px;cursor:pointer;padding:2px 4px;border-radius:3px;transition:color .2s,background .2s}
+.s-actions button:hover{color:#ccc;background:#2a2a2a}
+.s-rename-input{flex:1;font-size:12px;padding:3px 6px;background:#1c1c1c;border:1px solid #3b82f6;border-radius:4px;color:#e0e0e0;outline:none;font-family:inherit}
+
+/* ═══ 右侧主区域 ═══ */
+.main-area{flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* Header */
+.header{padding:10px 20px;background:#0d0d0d;border-bottom:1px solid #1f1f1f;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.header .current-name{flex:1}
+
+/* Messages */
+.messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+.msg{max-width:85%;padding:12px 16px;border-radius:18px;line-height:1.6;word-break:break-word}
+.msg.user{align-self:flex-end;background:#2563eb;color:#fff;border-bottom-right-radius:6px}
+.msg.shiyi{align-self:flex-start;background:#262626;color:#e0e0e0;border-bottom-left-radius:6px}
+.msg.shiyi.loading{opacity:.6}
+.msg.shiyi .welcome-en{margin-top:10px;padding-top:10px;border-top:1px solid #333;font-size:13px;color:#888;font-style:italic;line-height:1.5}
+.msg.time-label{text-align:center;font-size:11px;color:#444;margin:8px 0}
+.msg.user.pending{position:relative}
+.msg.user.pending::after{content:'…';font-size:16px;color:#888;margin-left:6px;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* 合并组 */
+.merge-group{margin:4px 0;border:1px solid #2a4a6a;border-radius:14px;background:#0f1520;overflow:hidden}
+.merge-group .msg.user{border-radius:0;background:#1a2e4a;border-bottom:1px solid #1e3458}
+.merge-group .msg.user:last-of-type{border-bottom:none}
+.merge-group .msg.shiyi.merge-reply{border-radius:0 0 14px 14px;background:#162030;border-top:2px solid #2a4a6a;font-size:13px}
+.merge-group .merge-label{font-size:10px;color:#4a6a8a;padding:2px 12px 4px;text-align:center}
+
+/* Input */
+.input-area{padding:12px 20px;background:#0d0d0d;border-top:1px solid #1f1f1f;display:flex;gap:8px;align-items:flex-end}
+.input-area textarea{flex:1;padding:10px 14px;border-radius:20px;border:1px solid #2a2a2a;background:#1a1a1a;color:#e0e0e0;font-size:14px;outline:none;transition:border-color .2s;resize:none;overflow-y:hidden;line-height:1.4;max-height:150px;font-family:inherit}
+.input-area textarea:focus{border-color:#2563eb}
+.input-area .btn-upload{background:none;border:1px solid #2a2a2a;color:#888;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.input-area .btn-upload:hover{background:#1a1a1a;color:#ccc;border-color:#444}
+.input-area .btn-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.input-area .btn-send{padding:10px 20px;border-radius:20px;border:none;background:#2563eb;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;flex-shrink:0}
+.input-area .btn-send:hover{background:#1d4ed8}
+.input-area .btn-send:disabled{opacity:.5;cursor:default}
+
+/* ═══ Workspace files bar ═══ */
+.files-bar{display:none;padding:6px 20px;background:#0a0a0a;border-top:1px solid #1a1a1a;gap:6px;flex-wrap:wrap;align-items:center}
+.files-bar.open{display:flex}
+.files-bar .f-label{font-size:11px;color:#555;margin-right:4px}
+.files-bar .f-item{font-size:11px;padding:4px 10px;background:#1a1a1a;border-radius:12px;color:#aaa;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px}
+.files-bar .f-item:hover{background:#252525;color:#ddd}
+.files-bar .f-item .dl-icon{font-size:10px;color:#555}
+
+/* ═══ Modal (保持原有风格) ═══ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;justify-content:center;align-items:flex-start;padding-top:40px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal-card{background:#141414;border:1px solid #1f1f1f;border-radius:12px;width:100%;max-width:580px;margin-bottom:40px}
+
+.modal-tabs{display:flex;border-bottom:1px solid #1f1f1f}
+.modal-tab{flex:1;padding:12px;border:none;background:none;color:#555;font-size:14px;cursor:default;border-bottom:2px solid transparent;transition:.2s;text-align:center}
+.modal-tab.active{color:#ddd;border-bottom-color:#3b82f6}
+
+.modal-body{padding:20px;max-height:65vh;overflow-y:auto}
+
+.mod{margin-bottom:14px;background:#1a1a1a;border:1px solid #252525;border-radius:10px;padding:18px}
+.mod-hd{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
+.mod-hd h3{font-size:14px;font-weight:600;color:#e4e4e4}
+.mod-hd .badge{font-size:10px;color:#ef4444;font-weight:600}
+.mod-hd .note{font-size:11px;color:#555;margin-left:auto}
+
+.fl{font-size:11px;color:#777;margin-bottom:5px;margin-top:11px}
+.fl:first-of-type{margin-top:0}
+
+input[type=password],input[type=text]{width:100%;padding:8px 10px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:6px;color:#d4d4d4;font-size:12px;outline:none;font-family:monospace;transition:border-color .2s}
+input:focus{border-color:#555}
+
+select{width:100%;padding:8px 10px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:6px;color:#d4d4d4;font-size:12px;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23777' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;cursor:pointer;transition:border-color .2s}
+select:focus{border-color:#555}
+
+.pvd{position:relative}
+.pvd-btn{width:100%;padding:8px 30px 8px 10px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:6px;color:#d4d4d4;font-size:12px;text-align:left;cursor:pointer;transition:border-color .2s;font-family:inherit;display:flex;align-items:center;gap:6px}
+.pvd-btn:hover{border-color:#444}
+.pvd-btn .arr{color:#666;font-size:9px;position:absolute;right:10px}
+.pvd-drop{display:none;position:absolute;top:100%;left:0;right:0;background:#1c1c1c;border:1px solid #333;border-radius:6px;margin-top:4px;z-index:60;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.7)}
+.pvd-drop.open{display:block}
+.pvd-opt{padding:9px 10px;cursor:pointer;transition:background .15s;border-bottom:1px solid #252525}
+.pvd-opt:last-child{border-bottom:none}
+.pvd-opt:hover{background:#252525}
+.pvd-opt .opt-name{font-size:12px;font-weight:600;color:#d4d4d4}
+.pvd-opt .opt-url{font-size:10px;color:#666;margin-top:1px;font-family:monospace}
+.pvd-opt .opt-models{font-size:10px;color:#555;margin-top:1px;font-family:monospace}
+.pvd-opt.selected{background:#1a2a3a;border-left:2px solid #3b82f6}
+
+.detail{padding:9px 10px;background:#111;border-radius:6px;font-size:11px;margin-bottom:11px}
+.d-row{display:flex;align-items:baseline;margin-bottom:3px}
+.d-row:last-child{margin-bottom:0}
+.d-lbl{color:#555;min-width:56px;flex-shrink:0;font-size:11px}
+.d-val{color:#888;font-family:monospace;font-size:10px}
+.d-input{flex:1;padding:5px 8px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:4px;color:#d4d4d4;font-family:monospace;font-size:10px;outline:none}
+.d-input:focus{border-color:#555}
+
+.mod-fb{cursor:pointer;margin-bottom:14px;background:#1a1a1a;border:1px solid #252525;border-radius:10px;padding:12px 18px;transition:background .2s}
+.mod-fb:hover{background:#1e1e1e}
+.fb-hd{display:flex;align-items:center;gap:8px}
+.fb-hd h3{font-size:14px;font-weight:600;color:#e4e4e4}
+.fb-badge{font-size:10px;color:#f59e0b;font-weight:500}
+.fb-arr{font-size:9px;color:#666;margin-left:auto}
+.fb-body{display:none;margin-top:8px;font-size:11px;color:#777;line-height:1.5}
+.fb-body.open{display:block}
+
+.modal-actions{display:flex;gap:10px;margin-top:16px}
+.modal-actions button{flex:1;padding:10px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-save{background:#2563eb;color:#fff;border:none}
+.btn-save:hover{background:#1d4ed8}
+.btn-save:disabled{opacity:.5;cursor:default}
+.btn-cancel{background:none;color:#888;border:1px solid #333}
+.btn-cancel:hover{color:#ccc;border-color:#555}
+
+.modal-status{margin-top:10px;padding:8px;border-radius:6px;font-size:12px;text-align:center;display:none}
+.modal-status.ok{display:block;background:#0a2a0a;color:#4c4;border:1px solid #1a4a1a}
+.modal-status.err{display:block;background:#2a0a0a;color:#e44;border:1px solid #4a1a1a}
+
+/* Confirm dialog */
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;justify-content:center;align-items:center}
+.confirm-overlay.open{display:flex}
+.confirm-box{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:24px;max-width:360px;width:100%}
+.confirm-box p{font-size:14px;margin-bottom:16px;color:#ccc}
+.confirm-box .btns{display:flex;gap:8px;justify-content:flex-end}
+.confirm-box button{padding:8px 20px;border-radius:8px;font-size:13px;cursor:pointer;border:none}
+.confirm-box .btn-confirm-yes{background:#ef4444;color:#fff}
+.confirm-box .btn-confirm-no{background:#2a2a2a;color:#aaa}
+
+/* Clerk panel */
+.clerk-list{max-height:300px;overflow-y:auto;margin-bottom:12px}
+.clerk-item{display:flex;align-items:center;padding:10px 12px;border-radius:8px;margin-bottom:6px;background:#1a1a1a;border:1px solid #222;transition:.2s;cursor:pointer}
+.clerk-item:hover{border-color:#3b82f6}
+.clerk-item.active-clerk{border-color:#3b82f6;background:#0d1a2d}
+.clerk-icon{width:10px;height:10px;border-radius:50%;margin-right:10px;flex-shrink:0}
+.clerk-icon.on{background:#22c55e;box-shadow:0 0 6px #22c55e66}
+.clerk-icon.off{background:#555}
+.clerk-info{flex:1;min-width:0}
+.clerk-name{font-size:13px;font-weight:600;color:#ddd}
+.clerk-desc{font-size:11px;color:#666;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clerk-status{font-size:10px;padding:2px 8px;border-radius:10px;margin-left:8px;flex-shrink:0}
+.clerk-status.enabled{background:#0a2a0a;color:#4c4;border:1px solid #1a4a1a}
+.clerk-status.disabled{background:#2a0a0a;color:#e44;border:1px solid #4a1a1a}
+
+/* Clerk detail */
+.clerk-detail{display:none;padding:12px;background:#141414;border:1px solid #1f1f1f;border-radius:8px;margin-top:8px}
+.clerk-detail.open{display:block}
+.clerk-detail h4{font-size:14px;font-weight:600;color:#e4e4e4;margin-bottom:8px}
+.clerk-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.clerk-meta span{font-size:11px;padding:2px 8px;border-radius:4px;background:#1a1a1a;color:#888}
+.clerk-section{margin-top:12px}
+.clerk-section h5{font-size:11px;color:#666;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.skill-tags{display:flex;flex-wrap:wrap;gap:4px}
+.skill-tag{font-size:10px;padding:2px 8px;border-radius:4px;background:#0a1a2a;color:#7aa2f7;border:1px solid #1a2a4a}
+.kb-list{font-size:11px;color:#777;margin:0;padding:0 0 0 16px}
+.kb-list li{margin-bottom:2px}
+.clerk-key-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.clerk-key-row label{font-size:11px;color:#888;min-width:120px;flex-shrink:0}
+.clerk-key-row input{flex:1;padding:6px 10px;background:#0d0d0d;border:1px solid #1f1f1f;border-radius:6px;color:#ccc;font-size:12px;font-family:monospace}
+.clerk-key-row .key-status{font-size:10px;color:#4c4;background:#0a2a0a;padding:2px 6px;border-radius:4px}
+.clerk-actions{display:flex;gap:8px;margin-top:12px}
+.clerk-actions button{padding:6px 16px;border-radius:6px;font-size:12px;cursor:pointer;border:none}
+.clerk-btn-toggle{background:#1a1a1a;color:#ccc;border:1px solid #333}
+.clerk-btn-toggle:hover{background:#222}
+.clerk-btn-toggle.danger{color:#e44;border-color:#4a1a1a}
+.clerk-btn-toggle.danger:hover{background:#2a0a0a}
+.clerk-btn-save{background:#2563eb;color:#fff}
+.clerk-btn-save:hover{background:#1d4ed8}
+
+/* Tab panels */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+</style>
+</head>
+<body>
+
+<!-- ═══ 左侧边栏 ═══ -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="dot" id="status-dot"></div>
+    <span class="title">史佚</span>
+    <button class="btn-new" id="btnNewSession" onclick="newSession()" title="新建对话">+</button>
+    <button class="gear-btn" onclick="openSettings()" title="设置">⚙</button>
+  </div>
+  <div class="session-list" id="sessionList"></div>
+</div>
+
+<!-- ═══ 右侧主区域 ═══ -->
+<div class="main-area">
+  <div class="header"><span class="current-name" id="currentSessionName">对话1</span></div>
+  <div class="messages" id="messages"></div>
+  <div class="files-bar" id="filesBar"><span class="f-label">📁 工作区:</span></div>
+  <div class="input-area">
+    <button class="btn-upload" title="上传文件">📎<input type="file" id="fileInput" onchange="uploadFile()"></button>
+    <textarea id="input" rows="1" placeholder="输入消息..." autofocus></textarea>
+    <button class="btn-send" id="sendBtn" onclick="send()">发送</button>
+  </div>
+</div>
+
+<!-- ═══ Settings Modal (保留原有) ═══ -->
+<div class="modal-overlay" id="settingsModal">
+<div class="modal-card">
+  <div class="modal-tabs">
+    <div class="modal-tab active" onclick="switchTab('chat')">对话</div>
+    <div class="modal-tab" onclick="switchTab('clerk')">吏员</div>
+    <div class="modal-tab" onclick="switchTab('api')">API</div>
+  </div>
+  <div class="modal-body">
+<div class="tab-panel" id="tab-chat" style="display:none">
+    <p style="color:#666;font-size:13px;padding:20px 0;text-align:center">对话设置将在后续版本中开放。</p>
+  </div>
+<div class="tab-panel" id="tab-clerk" style="display:none">
+    <div class="clerk-list" id="clerkList"></div>
+    <div class="clerk-detail" id="clerkDetail">
+      <h4 id="clerkDetailName">默认吏员</h4>
+      <div class="clerk-meta" id="clerkDetailMeta"></div>
+      <div class="clerk-section">
+        <h5>📦 能力 (Skills)</h5>
+        <div class="skill-tags" id="clerkDetailSkills"></div>
+      </div>
+      <div class="clerk-section" id="clerkDetailKB" style="display:none">
+        <h5>📂 知识库</h5>
+        <ul class="kb-list" id="clerkDetailKBFiles"></ul>
+      </div>
+      <div class="clerk-section" id="clerkDetailKeys" style="display:none">
+        <h5>🔑 API Keys</h5>
+        <div id="clerkDetailKeyInputs"></div>
+      </div>
+      <div class="clerk-actions">
+        <button class="clerk-btn-toggle" id="clerkToggleBtn" onclick="toggleClerk()"></button>
+        <button class="clerk-btn-save" id="clerkSaveKeys" onclick="saveClerkKeys()" style="display:none">保存 Key</button>
+        <button class="clerk-btn-save" id="clerkBackBtn" onclick="backToClerkList()" style="display:none">返回列表</button>
+      </div>
+      <div class="modal-status" id="clerkStatus"></div>
+    </div>
+  </div>
+<div class="tab-panel" id="tab-api">
+    <!-- Module 1: 主模型 -->
+    <div class="mod">
+      <div class="mod-hd"><h3>主模型</h3><span class="badge">必填</span><span class="note">核心对话模型</span></div>
+      <div class="fl">模型供应商</div>
+      <div class="pvd" id="pvd-main">
+        <button type="button" class="pvd-btn" onclick="togglePvd('main')">
+          <span id="main-pvd-name">DeepSeek</span><span class="arr">▾</span>
+        </button>
+        <div class="pvd-drop" id="main-drop"></div>
+      </div>
+      <div class="detail" id="main-detail">
+        <div class="d-row"><span class="d-lbl">API 地址</span><span class="d-val" id="main-url">https://api.deepseek.com/v1</span></div>
+        <div class="d-row"><span class="d-lbl">可用模型</span><span class="d-val" id="main-models">deepseek-v4-pro / deepseek-v4-flash / deepseek-chat</span></div>
+      </div>
+      <input type="hidden" id="main-custom-url" value="">
+      <input type="hidden" id="main-custom" value="0">
+      <div class="fl">模型选择</div>
+      <select id="main-model"></select>
+      <div class="fl">API Key</div>
+      <input type="password" id="main-key" placeholder="sk-..." autocomplete="off">
+    </div>
+    <!-- Module 2: Embedding -->
+    <div class="mod">
+      <div class="mod-hd"><h3>Embedding 模型</h3><span class="badge">必填</span><span class="note">向量化模型</span></div>
+      <div class="fl">模型供应商</div>
+      <div class="pvd" id="pvd-emb">
+        <button type="button" class="pvd-btn" onclick="togglePvd('emb')">
+          <span id="emb-pvd-name">硅基流动</span><span class="arr">▾</span>
+        </button>
+        <div class="pvd-drop" id="emb-drop"></div>
+      </div>
+      <div class="detail" id="emb-detail">
+        <div class="d-row"><span class="d-lbl">API 地址</span><span class="d-val" id="emb-url">https://api.siliconflow.cn/v1</span></div>
+        <div class="d-row"><span class="d-lbl">可用模型</span><span class="d-val" id="emb-models">BAAI/bge-m3 / BAAI/bge-large-zh-v1.5</span></div>
+      </div>
+      <input type="hidden" id="emb-custom-url" value="">
+      <input type="hidden" id="emb-custom" value="0">
+      <div class="fl">模型选择</div>
+      <select id="emb-model"></select>
+      <div class="fl">API Key</div>
+      <input type="password" id="emb-key" placeholder="sk-..." autocomplete="off">
+    </div>
+    <!-- Module 3: 加速模型 -->
+    <div class="mod">
+      <div class="mod-hd"><h3>加速模型</h3><span class="note">轻量级模型，提升响应速度</span></div>
+      <div class="fl">模型供应商</div>
+      <div class="pvd" id="pvd-light">
+        <button type="button" class="pvd-btn" onclick="togglePvd('light')">
+          <span id="light-pvd-name">跟随主模型 (DeepSeek)</span><span class="arr">▾</span>
+        </button>
+        <div class="pvd-drop" id="light-drop"></div>
+      </div>
+      <div class="detail" id="light-detail">
+        <div class="d-row"><span class="d-lbl">API 地址</span><span class="d-val" id="light-url">跟随主模型</span></div>
+        <div class="d-row"><span class="d-lbl">可用模型</span><span class="d-val" id="light-models">deepseek-v4-flash / deepseek-chat</span></div>
+      </div>
+      <input type="hidden" id="light-custom-url" value="">
+      <input type="hidden" id="light-custom" value="0">
+      <div class="fl">模型选择</div>
+      <select id="light-model"></select>
+      <div class="fl">API Key <span style="font-weight:400;color:#555">（可选，留空则继承主模型 Key）</span></div>
+      <input type="password" id="light-key" placeholder="留空则使用主模型 Key" autocomplete="off">
+    </div>
+    <!-- Module 4: Fallback -->
+    <div class="mod-fb" id="fb-card" onclick="toggleFallback(event)">
+      <div class="fb-hd"><h3>备用模型</h3><span class="fb-arr" id="fb-arr">▶</span></div>
+      <div class="fb-body" id="fb-body">
+        <div class="fl">模型供应商</div>
+        <div class="pvd" id="pvd-fb">
+          <button type="button" class="pvd-btn" onclick="togglePvd('fb');event.stopPropagation()">
+            <span id="fb-pvd-name">选择供应商</span><span class="arr">▾</span>
+          </button>
+          <div class="pvd-drop" id="fb-drop"></div>
+        </div>
+        <div class="detail" id="fb-detail">
+          <div class="d-row"><span class="d-lbl">API 地址</span><span class="d-val" id="fb-url">—</span></div>
+          <div class="d-row"><span class="d-lbl">可用模型</span><span class="d-val" id="fb-models">—</span></div>
+        </div>
+        <input type="hidden" id="fb-custom-url" value="">
+        <input type="hidden" id="fb-custom" value="0">
+        <div class="fl">模型选择</div><select id="fb-model"></select>
+        <div class="fl">API Key <span style="font-weight:400;color:#555">（可选，留空则继承主模型 Key）</span></div>
+        <input type="password" id="fb-key" placeholder="留空则使用主模型 Key" autocomplete="off">
+      </div>
+    </div>
+    </div>
+</div>
+    <div class="modal-status" id="modalStatus"></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ Confirm dialog ═══ -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p id="confirmMsg"></p>
+    <div class="btns">
+      <button class="btn-confirm-no" onclick="closeConfirm()">取消</button>
+      <button class="btn-confirm-yes" id="confirmYes">删除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// State
+// ═══════════════════════════════════════
+let currentSessionId = '';
+let currentSessionName = '';
+let sessions = [];
+let sending = false;
+let confirmCb = null;
+
+// ═══ 并发对话状态 ═══
+let pendingMsgIds = new Map();  // msg_id -> user_msg_id  (enqueue返回的msg_id -> 本地DOM data-msg-id)
+let lastSeenMsgId = '';         // 上次轮询游标
+let pollTimer = null;
+
+// ═══════════════════════════════════════
+// Session management
+// ═══════════════════════════════════════
+async function loadSessions() {
+  try {
+    const r = await fetch('/api/sessions'); const d = await r.json();
+    sessions = d.sessions || [];
+    // 如果当前 session 被删了，切到第一个
+    if (!sessions.find(s => s.id === currentSessionId)) {
+      if (sessions.length > 0) {
+        currentSessionId = sessions[0].id;
+        currentSessionName = sessions[0].name;
+      }
+    }
+    renderSessions();
+  } catch(e) { console.error('loadSessions', e); }
+}
+
+function renderSessions() {
+  const list = document.getElementById('sessionList');
+  const canCreate = sessions.length < 10;
+  document.getElementById('btnNewSession').disabled = !canCreate;
+
+  list.innerHTML = sessions.map(s => `
+    <div class="session-item${s.id === currentSessionId ? ' active' : ''}" onclick="switchSession('${s.id}')" data-sid="${s.id}">
+      <span class="s-name">${escHtml(s.name)}</span>
+      <span class="s-count">${s.message_count || 0}</span>
+      <span class="s-actions">
+        <button onclick="event.stopPropagation();startRename('${s.id}')" title="改名">✎</button>
+        <button onclick="event.stopPropagation();confirmDelete('${s.id}')" title="删除">✕</button>
+      </span>
+    </div>
+  `).join('');
+}
+
+async function newSession() {
+  try {
+    const r = await fetch('/api/sessions', { method:'POST' });
+    if (!r.ok) { const e = await r.json(); alert(e.detail || '创建失败'); return; }
+    const d = await r.json();
+    await loadSessions();
+    switchSession(d.id);
+  } catch(e) { alert('创建失败: ' + e.message); }
+}
+
+async function switchSession(sid) {
+  currentSessionId = sid;
+  const s = sessions.find(x => x.id === sid);
+  if (s) currentSessionName = s.name;
+  document.getElementById('currentSessionName').textContent = currentSessionName;
+  renderSessions();
+  await loadMessages();
+}
+
+async function loadMessages() {
+  const container = document.getElementById('messages');
+  container.innerHTML = '';
+  if (!currentSessionId) {
+    container.innerHTML = '<div class="msg shiyi welcome-msg">敬启者，吾乃史佚，承天子之遗忘者也。幸蒙见用，乐效微劳，为君分忧。<div class="welcome-en">To whom it may concern, I am ShiYi, the keeper of forgotten things for the Son of Heaven. Honored to be of service, I gladly lend my humble efforts to ease your burdens.</div></div>';
+    return;
+  }
+  try {
+    const r = await fetch(`/api/sessions/${currentSessionId}/messages`);
+    const d = await r.json();
+    const msgs = d.messages || [];
+    if (msgs.length === 0) {
+      container.innerHTML = '<div class="msg shiyi welcome-msg">敬启者，吾乃史佚，承天子之遗忘者也。幸蒙见用，乐效微劳，为君分忧。<div class="welcome-en">To whom it may concern, I am ShiYi, the keeper of forgotten things for the Son of Heaven. Honored to be of service, I gladly lend my humble efforts to ease your burdens.</div></div>';
+    } else {
+      msgs.forEach(m => appendMsgEl(m.content, m.role));
+    }
+  } catch(e) { console.error('loadMessages', e); }
+  scrollBottom();
+}
+
+function startRename(sid) {
+  const item = document.querySelector(`.session-item[data-sid="${sid}"]`);
+  if (!item) return;
+  const s = sessions.find(x => x.id === sid);
+  if (!s) return;
+  const nameSpan = item.querySelector('.s-name');
+  const input = document.createElement('input');
+  input.className = 's-rename-input';
+  input.value = s.name;
+  input.onblur = () => finishRename(sid, input.value);
+  input.onkeydown = e => { if (e.key==='Enter') finishRename(sid, input.value); if (e.key==='Escape') { loadSessions(); } };
+  nameSpan.replaceWith(input);
+  input.focus(); input.select();
+}
+
+async function finishRename(sid, name) {
+  name = name.trim();
+  if (!name) { await loadSessions(); return; }
+  try {
+    await fetch(`/api/sessions/${sid}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name}) });
+  } catch(e) {}
+  await loadSessions();
+  if (sid === currentSessionId) {
+    const s = sessions.find(x => x.id === sid);
+    if (s) currentSessionName = s.name;
+    document.getElementById('currentSessionName').textContent = currentSessionName;
+  }
+}
+
+function confirmDelete(sid) {
+  if (sessions.length <= 1) { alert('至少保留一个对话窗口'); return; }
+  const s = sessions.find(x => x.id === sid);
+  document.getElementById('confirmMsg').textContent = '删除对话窗口「' + (s ? s.name : '') + '」？聊天记录将永久丢失。';
+  confirmCb = () => deleteSession(sid);
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+  confirmCb = null;
+}
+
+async function deleteSession(sid) {
+  try {
+    await fetch(`/api/sessions/${sid}`, { method:'DELETE' });
+  } catch(e) {}
+  closeConfirm();
+  await loadSessions();
+  if (currentSessionId === sid) {
+    if (sessions.length > 0) switchSession(sessions[0].id);
+    else currentSessionId = '';
+  }
+}
+
+document.getElementById('confirmYes').addEventListener('click', () => {
+  if (confirmCb) confirmCb();
+});
+
+// ═══════════════════════════════════════
+// Chat
+// ═══════════════════════════════════════
+const cInput = document.getElementById('input');
+const cSendBtn = document.getElementById('sendBtn');
+const cMessages = document.getElementById('messages');
+const statusDot = document.getElementById('status-dot');
+
+async function checkHealth() {
+  try { const r = await fetch('/api/health'); const d = await r.json();
+    statusDot.style.background = d.llm_available ? '#4ade80' : '#f59e0b';
+  } catch(e) { statusDot.style.background = '#ef4444'; }
+}
+checkHealth(); setInterval(checkHealth, 30000);
+
+cInput.addEventListener('keydown', e => {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+cInput.addEventListener('input', () => {
+  cInput.style.height = 'auto';
+  cInput.style.height = Math.min(cInput.scrollHeight, 150) + 'px';
+});
+
+function appendMsgEl(text, role) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role; div.textContent = text;
+  cMessages.appendChild(div);
+  return div;
+}
+
+function scrollBottom() {
+  cMessages.scrollTop = cMessages.scrollHeight;
+}
+
+async function send() {
+  const text = cInput.value.trim();
+  if (!text) return;
+  cInput.value = ''; cInput.style.height = 'auto'; sending = true; cSendBtn.disabled = true;
+
+  // 显示用户消息（带 msg-id 供后续回调匹配）
+  const userEl = appendMsgEl(text, 'user');
+  const localId = 'm-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
+  userEl.dataset.msgId = localId;
+  userEl.classList.add('pending');
+  scrollBottom();
+
+  // 非阻塞入队
+  try {
+    const r = await fetch('/api/chat/enqueue', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:text, session_id: currentSessionId})
+    });
+    if (!r.ok) {
+      userEl.textContent += ' [入队失败]'; userEl.classList.remove('pending');
+      sending = false; cSendBtn.disabled = false; return;
+    }
+    const d = await r.json();
+    pendingMsgIds.set(d.msg_id, localId);
+    if (!lastSeenMsgId) lastSeenMsgId = d.msg_id;
+    startPolling();
+  } catch(e) {
+    userEl.textContent += ' [连接失败]'; userEl.classList.remove('pending');
+  }
+  sending = false; cSendBtn.disabled = false; cInput.focus();
+}
+
+function startPolling() {
+  if (pollTimer) return;
+  pollReplies();
+  pollTimer = setInterval(pollReplies, 1500);
+}
+
+async function pollReplies() {
+  if (pendingMsgIds.size === 0) {
+    stopPolling(); return;
+  }
+  try {
+    const r = await fetch('/api/chat/replies?since_msg_id=' + encodeURIComponent(lastSeenMsgId));
+    const d = await r.json();
+    for (const entry of (d.replies || [])) {
+      renderReply(entry);
+      // 更新游标到最大的 batch_id
+      const bids = entry.batch_ids || [entry.msg_id];
+      for (const bid of bids) {
+        if (bid > lastSeenMsgId) lastSeenMsgId = bid;
+        pendingMsgIds.delete(bid);
+      }
+    }
+    if (pendingMsgIds.size === 0) {
+      stopPolling();
+      loadSessions();
+    }
+  } catch(e) { /* 网络抖动，下轮再试 */ }
+}
+
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+function renderReply(entry) {
+  const replyText = entry.reply || (entry.error ? '错误: ' + entry.error : '（空回复）');
+  const batchIds = entry.batch_ids || [entry.msg_id];
+  if (batchIds.length === 0) return;
+
+  // 移除所有相关用户消息的 pending 标记
+  for (const bid of batchIds) {
+    const localId = pendingMsgIds.get(bid);
+    if (localId) {
+      const el = document.querySelector(`.msg.user[data-msg-id="${localId}"]`);
+      if (el) el.classList.remove('pending');
+    }
+  }
+
+  if (batchIds.length === 1) {
+    // 单条回复：挂在用户消息下方
+    const localId = pendingMsgIds.get(batchIds[0]);
+    if (localId) {
+      const userEl = document.querySelector(`.msg.user[data-msg-id="${localId}"]`);
+      if (userEl) {
+        const replyEl = document.createElement('div');
+        replyEl.className = 'msg shiyi'; replyEl.textContent = replyText;
+        userEl.after(replyEl);
+      }
+    }
+  } else {
+    // 合并回复：创建合并组包裹多条用户消息+一条回复
+    const localIds = batchIds.map(bid => pendingMsgIds.get(bid)).filter(Boolean);
+    if (localIds.length === 0) return;
+    const firstEl = document.querySelector(`.msg.user[data-msg-id="${localIds[0]}"]`);
+    if (!firstEl) return;
+
+    const group = document.createElement('div');
+    group.className = 'merge-group';
+
+    // 把批量的 user 消息移入 group
+    for (const lid of localIds) {
+      const el = document.querySelector(`.msg.user[data-msg-id="${lid}"]`);
+      if (el) group.appendChild(el);
+    }
+
+    // 合并标签
+    const label = document.createElement('div');
+    label.className = 'merge-label'; label.textContent = '合并回复';
+    group.appendChild(label);
+
+    // 回复
+    const replyEl = document.createElement('div');
+    replyEl.className = 'msg shiyi merge-reply'; replyEl.textContent = replyText;
+    group.appendChild(replyEl);
+
+    firstEl.before(group);
+  }
+  scrollBottom();
+}
+
+// ═══════════════════════════════════════
+// File upload
+// ═══════════════════════════════════════
+async function uploadFile() {
+  const input = document.getElementById('fileInput');
+  const file = input.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const r = await fetch('/api/upload', { method:'POST', body:formData });
+    const d = await r.json();
+    if (r.ok) {
+      // 在输入框插入文件名
+      cInput.value = (cInput.value ? cInput.value + ' ' : '') + '[已上传: ' + d.filename + ']';
+      cInput.focus();
+      loadWorkspaceFiles();
+    } else {
+      alert(d.detail || '上传失败');
+    }
+  } catch(e) { alert('上传失败: ' + e.message); }
+  input.value = '';
+}
+
+async function loadWorkspaceFiles() {
+  try {
+    const r = await fetch('/api/workspace-files'); const d = await r.json();
+    const bar = document.getElementById('filesBar');
+    if (!d.files || d.files.length === 0) {
+      bar.classList.remove('open');
+      return;
+    }
+    bar.classList.add('open');
+    bar.innerHTML = '<span class="f-label">📁 工作区:</span>' +
+      d.files.map(f => `<span class="f-item" onclick="downloadFile('${escHtml(f.name)}')">${escHtml(f.name)} <span class="dl-icon">⬇</span></span>`).join('');
+  } catch(e) {}
+}
+
+function downloadFile(name) {
+  window.open('/api/download?path=' + encodeURIComponent(name), '_blank');
+}
+
+loadWorkspaceFiles();
+
+// ═══════════════════════════════════════
+// Provider data (保留原有)
+// ═══════════════════════════════════════
+const PROVIDERS = {
+  'DeepSeek':   { base_url:'https://api.deepseek.com/v1',   models:['deepseek-v4-pro','deepseek-v4-flash','deepseek-chat'], fast:'deepseek-v4-flash' },
+  'Kimi':       { base_url:'https://api.moonshot.cn/v1',     models:['kimi-k2.6','moonshot-v1-8k','moonshot-v1-32k','moonshot-v1-128k'], fast:'moonshot-v1-8k' },
+  '火山引擎':   { base_url:'https://ark.cn-beijing.volces.com/api/v3', models:['doubao-pro-32k','doubao-lite-32k'], fast:'doubao-lite-32k' },
+  '硅基流动':   { base_url:'https://api.siliconflow.cn/v1',  models:['deepseek-ai/DeepSeek-V3','Qwen/Qwen3-235B-A22B'], emb_models:['BAAI/bge-m3','BAAI/bge-large-zh-v1.5'], fast:'Qwen/Qwen3-235B-A22B' },
+};
+
+let state = {
+  main:      { provider:'DeepSeek', model:'deepseek-v4-pro', custom:false, customUrl:'' },
+  emb:       { provider:'硅基流动', model:'BAAI/bge-m3',      custom:false, customUrl:'' },
+  light:     { provider:'follow',   model:'deepseek-v4-flash', custom:false, customUrl:'' },
+  fb:        { provider:'',         model:'',                  custom:false, customUrl:'', enabled:false },
+};
+
+function providerOpts(module) {
+  if (module === 'fb') return Object.keys(PROVIDERS).map(k=>({key:k,name:k})).concat([{key:'custom',name:'自定义'}]);
+  if (module === 'light') {
+    const mn = state.main.provider;
+    return [{key:'follow', name:'跟随主模型 ('+mn+')'}].concat(Object.keys(PROVIDERS).map(k=>({key:k,name:k})).concat([{key:'custom',name:'自定义'}]));
+  }
+  return Object.keys(PROVIDERS).map(k=>({key:k,name:k})).concat([{key:'custom',name:'自定义'}]);
+}
+
+function buildDrop(module) {
+  const drop = document.getElementById(module+'-drop');
+  const st = state[module];
+  const opts = providerOpts(module);
+  drop.innerHTML = opts.map(o => {
+    const sel = (st.provider===o.key ? ' selected' : '');
+    if (o.key==='custom') return `<div class="pvd-opt${sel}" onclick="selectPvd('${module}','custom')"><span class="opt-name">自定义</span><span class="opt-url" style="color:#555">手动填写 API 地址和模型</span></div>`;
+    if (o.key==='follow') return `<div class="pvd-opt${sel}" onclick="selectPvd('${module}','follow')"><span class="opt-name">${o.name}</span></div>`;
+    const p = PROVIDERS[o.key];
+    if (!p) return '';
+    const displayModels = (module==='emb' && p.emb_models) ? p.emb_models : p.models;
+    return `<div class="pvd-opt${sel}" onclick="selectPvd('${module}','${o.key}')"><div class="opt-name">${o.key}</div><div class="opt-url">${p.base_url}</div><div class="opt-models">${displayModels.join(' / ')}</div></div>`;
+  }).join('');
+}
+
+function togglePvd(module) {
+  document.querySelectorAll('.pvd-drop.open').forEach(d => { if (d.id!==module+'-drop') d.classList.remove('open'); });
+  buildDrop(module);
+  document.getElementById(module+'-drop').classList.toggle('open');
+}
+
+function buildDetailHTML(module, url, models) {
+  return `<div class="d-row"><span class="d-lbl">API 地址</span><span class="d-val" id="${module}-url">${url}</span></div>
+          <div class="d-row"><span class="d-lbl">可用模型</span><span class="d-val" id="${module}-models">${models}</span></div>`;
+}
+
+function buildCustomDetailHTML(module) {
+  return `<div class="d-row"><span class="d-lbl">API 地址</span><input class="d-input" id="${module}-custom-url-input" placeholder="https://..." onchange="onCustomUrlChange('${module}')"></div>`;
+}
+
+function onCustomUrlChange(module) {
+  const inp = document.getElementById(module+'-custom-url-input');
+  state[module].customUrl = inp.value;
+  document.getElementById(module+'-custom-url').value = inp.value;
+}
+
+function selectPvd(module, key) {
+  const nameEl = document.getElementById(module+'-pvd-name');
+  const st = state[module];
+  st.provider = key;
+  if (module === 'fb') { st.enabled = true; }
+
+  if (key==='follow') {
+    const mn = state.main.provider;
+    nameEl.textContent = '跟随主模型 ('+mn+')';
+    st.custom=false; st.customUrl='';
+    document.getElementById(module+'-custom').value='0';
+    document.getElementById(module+'-custom-url').value='';
+    const mp = PROVIDERS[mn];
+    const fastModels = mp ? mp.models.filter(m=>m!=='deepseek-v4-pro'&&m!=='kimi-k2.6'&&m!=='doubao-pro-32k'&&m!=='deepseek-ai/DeepSeek-V3') : [];
+    document.getElementById(module+'-detail').classList.remove('custom');
+    document.getElementById(module+'-detail').innerHTML = buildDetailHTML(module, '跟随主模型', fastModels.join(' / ')||'—');
+  } else if (key==='custom') {
+    nameEl.textContent = '自定义';
+    st.custom=true; st.customUrl='';
+    document.getElementById(module+'-custom').value='1';
+    document.getElementById(module+'-detail').classList.add('custom');
+    document.getElementById(module+'-detail').innerHTML = buildCustomDetailHTML(module);
+  } else {
+    nameEl.textContent = key;
+    st.custom=false; st.customUrl='';
+    document.getElementById(module+'-custom').value='0';
+    document.getElementById(module+'-custom-url').value='';
+    const p = PROVIDERS[key];
+    const modelsText = (module==='emb' && p.emb_models) ? p.emb_models.join(' / ') : p.models.join(' / ');
+    document.getElementById(module+'-detail').classList.remove('custom');
+    document.getElementById(module+'-detail').innerHTML = buildDetailHTML(module, p.base_url, modelsText);
+  }
+  document.getElementById(module+'-drop').classList.remove('open');
+  updateModelSelect(module);
+  if (module==='main') onMainProviderChange();
+}
+
+function updateModelSelect(module) {
+  const sel = document.getElementById(module+'-model');
+  const st = state[module];
+  let models = [];
+  if (module==='emb') {
+    const p = PROVIDERS[st.provider];
+    if (st.provider==='custom') { sel.innerHTML = '<option value="">自定义 — 下方手动填写</option>'; return; }
+    if (p && p.emb_models) { models = p.emb_models; }
+  } else if (module==='light' && st.provider==='follow') {
+    const mp = PROVIDERS[state.main.provider];
+    if (mp) models = mp.models.slice();
+  } else if (st.provider==='custom') {
+    sel.innerHTML = '<option value="">自定义 — 下方手动填写</option>'; return;
+  } else { const p = PROVIDERS[st.provider]; if (p) models = p.models; }
+
+  const prev = st.model;
+  sel.innerHTML = models.map(m => {
+    let label = m;
+    if (module==='light' && st.provider!=='custom') {
+      let pk = st.provider==='follow' ? state.main.provider : st.provider;
+      const mp = PROVIDERS[pk];
+      if (mp && m===mp.fast) label = m + ' (推荐)';
+    }
+    return `<option value="${m}"${m===prev?' selected':''}>${label}</option>`;
+  }).join('') + '<option value="custom">自定义</option>';
+
+  if (module==='light' && st.provider==='follow') {
+    const mp = PROVIDERS[state.main.provider];
+    if (mp && mp.fast) { sel.value = mp.fast; st.model = mp.fast; }
+  }
+}
+
+function onMainProviderChange() {
+  if (state.light.provider==='follow') {
+    document.getElementById('light-pvd-name').textContent = '跟随主模型 ('+state.main.provider+')';
+    updateModelSelect('light');
+    const mp = PROVIDERS[state.main.provider];
+    if (mp) {
+      const fm = mp.models.filter(m=>m!=='deepseek-v4-pro'&&m!=='kimi-k2.6'&&m!=='doubao-pro-32k'&&m!=='deepseek-ai/DeepSeek-V3');
+      document.getElementById('light-detail').innerHTML = buildDetailHTML('light','跟随主模型',fm.join(' / ')||'—');
+    }
+  }
+}
+
+function toggleFallback(e) {
+  if (e && (e.target.closest('.pvd-btn') || e.target.closest('.pvd-drop'))) return;
+  const b = document.getElementById('fb-body'), a = document.getElementById('fb-arr');
+  b.classList.toggle('open'); a.textContent = b.classList.contains('open')?'▼':'▶';
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.pvd-btn') && !e.target.closest('.pvd-drop'))
+    document.querySelectorAll('.pvd-drop.open').forEach(d=>d.classList.remove('open'));
+});
+
+function initModels() { updateModelSelect('main'); updateModelSelect('emb'); updateModelSelect('light'); updateModelSelect('fb'); }
+initModels();
+
+// ═══════════════════════════════════════
+// Settings modal
+// ═══════════════════════════════════════
+async function openSettings() {
+  try {
+    const r = await fetch('/api/config'); const d = await r.json();
+    document.getElementById('main-key').placeholder = d.main.key_set ? '已配置 (●●●)' : 'sk-...';
+    document.getElementById('emb-key').placeholder = d.embedding.key_set ? '已配置 (●●●)' : 'sk-...';
+    document.getElementById('light-key').placeholder = d.light.key_set ? '已配置 (●●●)' : '留空则使用主模型 Key';
+    document.getElementById('fb-key').placeholder = (d.fallback && d.fallback.key_set) ? '已配置 (●●●)' : '留空则使用主模型 Key';
+    if (d.main.model) { state.main.model = d.main.model; updateModelSelect('main'); }
+    if (d.embedding.model) { state.emb.model = d.embedding.model; updateModelSelect('emb'); }
+    if (d.light.model) { state.light.model = d.light.model; updateModelSelect('light'); }
+    if (d.fallback && d.fallback.model) { state.fb.model = d.fallback.model; state.fb.enabled = true; updateModelSelect('fb'); }
+  } catch(e) {}
+  document.getElementById('settingsModal').classList.add('open');
+  // 初始化 tab：默认显示 API（保留向后兼容）
+  switchTab('api');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+  document.getElementById('modalStatus').className = 'modal-status';
+}
+
+document.getElementById('settingsModal').addEventListener('click', function(e) { if (e.target === this) closeSettings(); });
+
+function getUrl(module) {
+  const st = state[module];
+  if (module==='fb' && !st.enabled) return '';
+  if (module==='light' && st.provider==='follow') return '';
+  if (st.custom) {
+    const inp = document.getElementById(module+'-custom-url-input');
+    return inp ? inp.value.trim() : st.customUrl;
+  }
+  const p = PROVIDERS[st.provider];
+  return p ? p.base_url : '';
+}
+
+function getModel(module) {
+  const sel = document.getElementById(module+'-model');
+  if (!sel || sel.value==='custom') return '';
+  return sel.value;
+}
+
+async function saveConfig() {
+  const btn = document.getElementById('saveBtn');
+  const status = document.getElementById('modalStatus');
+  status.className = 'modal-status';
+
+  const mainKey = document.getElementById('main-key').value.trim();
+  const embKey = document.getElementById('emb-key').value.trim();
+  const mainKeyPlaceholder = document.getElementById('main-key').placeholder;
+  const embKeyPlaceholder = document.getElementById('emb-key').placeholder;
+  const mainKeyOK = mainKey || mainKeyPlaceholder.includes('已配置');
+  const embKeyOK = embKey || embKeyPlaceholder.includes('已配置');
+
+  if (!mainKeyOK || !embKeyOK) {
+    status.textContent = '请填写主模型和 Embedding 的 API Key';
+    status.className = 'modal-status err'; return;
+  }
+
+  const mainModel = getModel('main'), embModel = getModel('emb'), lightModel = getModel('light');
+  if (!mainModel || !embModel || !lightModel) {
+    status.textContent = '请选择所有模型'; status.className = 'modal-status err'; return;
+  }
+
+  const lightKey = document.getElementById('light-key').value.trim();
+  const lightUrl = getUrl('light');
+  const fbModel = state.fb.enabled ? getModel('fb') : '';
+  const fbKey = state.fb.enabled ? document.getElementById('fb-key').value.trim() : '';
+  const fbUrl = getUrl('fb');
+
+  btn.disabled = true; btn.textContent = '保存中…';
+  try {
+    const payload = {
+      main_key: mainKey, embedding_key: embKey,
+      main_model: mainModel, main_base_url: getUrl('main'),
+      embedding_model: embModel, embedding_base_url: getUrl('emb'),
+      light_model: lightModel, light_key: lightKey, light_base_url: lightUrl,
+      fallback_model: fbModel, fallback_key: fbKey, fallback_base_url: fbUrl,
+    };
+    const res = await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json();
+    if (res.ok && data.status==='ok') {
+      status.textContent = '已保存'; status.className = 'modal-status ok';
+      setTimeout(closeSettings, 1000);
+    } else {
+      status.textContent = data.message||data.detail||'保存失败';
+      status.className = 'modal-status err';
+    }
+  } catch(err) {
+    status.textContent = '网络错误: '+err.message;
+    status.className = 'modal-status err';
+  } finally { btn.disabled = false; btn.textContent = '保存'; }
+}
+
+// ═══════════════════════════════════════
+
+// ═══════════════════════════════════════
+// Tab switching
+// ═══════════════════════════════════════
+let currentTab = 'api';
+
+function switchTab(name) {
+  currentTab = name;
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
+  
+  const tabs = document.querySelectorAll('.modal-tab');
+  const panels = document.querySelectorAll('.tab-panel');
+  const names = ['chat', 'clerk', 'api'];
+  const idx = names.indexOf(name);
+  if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+  
+  const panel = document.getElementById('tab-' + name);
+  if (panel) { panel.style.display = 'block'; panel.classList.add('active'); }
+  
+  // Show/hide modal-actions (only API tab needs the global save button)
+  const actions = document.querySelector('.modal-actions');
+  if (actions) actions.style.display = name === 'api' ? 'flex' : 'none';
+  
+  if (name === 'clerk') loadClerks();
+}
+
+// ═══════════════════════════════════════
+// Clerk management
+// ═══════════════════════════════════════
+let clerks = [];
+let selectedClerkId = '';
+
+async function loadClerks() {
+  try {
+    const r = await fetch('/api/clerks');
+    const d = await r.json();
+    clerks = d.clerks || [];
+    renderClerkList();
+  } catch(e) { console.error('loadClerks', e); }
+}
+
+function renderClerkList() {
+  const list = document.getElementById('clerkList');
+  if (clerks.length === 0) {
+    list.innerHTML = '<p style="color:#666;font-size:13px;padding:20px;text-align:center">暂无吏员。将 clerk-* 目录放入 ~/.shiyi/clerks/ 即可安装。</p>';
+    return;
+  }
+  
+  list.innerHTML = clerks.map(c => {
+    const enabled = c.enabled !== false;
+    const hasKeys = c.api_keys && c.api_keys.length > 0;
+    const keysOk = hasKeys ? Object.values(c._key_status || {}).every(v => v) : true;
+    const iconCls = (enabled && keysOk) ? 'on' : 'off';
+    const statusLabel = enabled ? '已启用' : '已禁用';
+    const statusCls = enabled ? 'enabled' : 'disabled';
+    
+    return `<div class="clerk-item${c.clerk_id === selectedClerkId ? ' active-clerk' : ''}" onclick="selectClerk('${c.clerk_id}')">
+      <div class="clerk-icon ${iconCls}"></div>
+      <div class="clerk-info">
+        <div class="clerk-name">${escHtml(c.name)}</div>
+        <div class="clerk-desc">${escHtml(c.description || '')}</div>
+      </div>
+      <span class="clerk-status ${statusCls}">${statusLabel}</span>
+    </div>`;
+  }).join('');
+}
+
+function selectClerk(id) {
+  selectedClerkId = id;
+  renderClerkList();
+  loadClerkDetail(id);
+}
+
+async function loadClerkDetail(id) {
+  try {
+    const r = await fetch('/api/clerks/' + id);
+    if (!r.ok) throw new Error('Not found');
+    const c = await r.json();
+    renderClerkDetail(c);
+  } catch(e) {
+    document.getElementById('clerkDetail').classList.remove('open');
+  }
+}
+
+function renderClerkDetail(c) {
+  const detail = document.getElementById('clerkDetail');
+  const enabled = c.enabled !== false;
+  
+  document.getElementById('clerkDetailName').textContent = c.name;
+  
+  // Meta
+  const meta = document.getElementById('clerkDetailMeta');
+  const source = c._source === 'builtin' ? '内置' : '用户安装';
+  meta.innerHTML = `<span>版本 ${escHtml(c.version || '?')}</span><span>${source}</span><span>${c.clerk_id}</span>`;
+  
+  // Skills
+  const skillsDiv = document.getElementById('clerkDetailSkills');
+  const skills = c.skills || c.capabilities || [];
+  const skillFiles = c._skill_files || [];
+  const allSkills = [...new Set([...skills, ...skillFiles])];
+  skillsDiv.innerHTML = allSkills.length > 0 
+    ? allSkills.map(s => `<span class="skill-tag">${escHtml(s)}</span>`).join('')
+    : '<span style="color:#666;font-size:11px">无 skill 清单</span>';
+  
+  // Knowledge base
+  const kbDiv = document.getElementById('clerkDetailKB');
+  const kbFiles = c._kb_files || [];
+  if (kbFiles.length > 0) {
+    kbDiv.style.display = 'block';
+    document.getElementById('clerkDetailKBFiles').innerHTML = kbFiles.map(f => `<li>${escHtml(f)}</li>`).join('');
+  } else {
+    kbDiv.style.display = 'none';
+  }
+  
+  // API keys
+  const keysDiv = document.getElementById('clerkDetailKeys');
+  const declaredKeys = c.api_keys || [];
+  const keyStatus = c._key_status || {};
+  if (declaredKeys.length > 0) {
+    keysDiv.style.display = 'block';
+    document.getElementById('clerkDetailKeyInputs').innerHTML = declaredKeys.map(k => {
+      const configured = keyStatus[k];
+      return `<div class="clerk-key-row">
+        <label>${escHtml(k)}</label>
+        <input type="password" id="clerk-key-${escHtml(k)}" placeholder="${configured ? '已配置 (●●●)' : 'sk-...'}" autocomplete="off">
+        ${configured ? '<span class="key-status">✓</span>' : ''}
+      </div>`;
+    }).join('');
+    document.getElementById('clerkSaveKeys').style.display = 'inline-block';
+  } else {
+    keysDiv.style.display = 'none';
+    document.getElementById('clerkSaveKeys').style.display = 'none';
+  }
+  
+  // Toggle button
+  const toggleBtn = document.getElementById('clerkToggleBtn');
+  if (enabled) {
+    toggleBtn.textContent = '禁用';
+    toggleBtn.className = 'clerk-btn-toggle danger';
+  } else {
+    toggleBtn.textContent = '启用';
+    toggleBtn.className = 'clerk-btn-toggle';
+  }
+  
+  document.getElementById('clerkBackBtn').style.display = 'none';
+  document.getElementById('clerkStatus').className = 'modal-status';
+  detail.classList.add('open');
+}
+
+async function toggleClerk() {
+  if (!selectedClerkId) return;
+  const c = clerks.find(x => x.clerk_id === selectedClerkId);
+  if (!c) return;
+  
+  const enabled = c.enabled !== false;
+  const action = enabled ? 'disable' : 'enable';
+  
+  const status = document.getElementById('clerkStatus');
+  status.className = 'modal-status';
+  
+  try {
+    const r = await fetch('/api/clerks/' + selectedClerkId + '/' + action, { method: 'POST' });
+    const d = await r.json();
+    if (r.ok) {
+      c.enabled = !enabled;
+      status.textContent = d.message;
+      status.className = 'modal-status ok';
+      renderClerkDetail(c);
+      renderClerkList();
+    } else {
+      status.textContent = d.detail || '操作失败';
+      status.className = 'modal-status err';
+    }
+  } catch(e) {
+    status.textContent = '网络错误: ' + e.message;
+    status.className = 'modal-status err';
+  }
+}
+
+async function saveClerkKeys() {
+  if (!selectedClerkId) return;
+  const c = clerks.find(x => x.clerk_id === selectedClerkId);
+  if (!c) return;
+  
+  const status = document.getElementById('clerkStatus');
+  status.className = 'modal-status';
+  
+  const apiKeys = {};
+  const declaredKeys = c.api_keys || [];
+  for (const k of declaredKeys) {
+    const input = document.getElementById('clerk-key-' + k);
+    if (input && input.value.trim()) {
+      apiKeys[k] = input.value.trim();
+    }
+  }
+  
+  if (Object.keys(apiKeys).length === 0) {
+    status.textContent = '未填写任何 Key';
+    status.className = 'modal-status err';
+    return;
+  }
+  
+  try {
+    const r = await fetch('/api/clerks/' + selectedClerkId + '/config', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({api_keys: apiKeys})
+    });
+    const d = await r.json();
+    if (r.ok) {
+      status.textContent = d.message;
+      status.className = 'modal-status ok';
+      // Refresh
+      setTimeout(() => { loadClerkDetail(selectedClerkId); loadClerks(); }, 500);
+    } else {
+      status.textContent = d.detail || '保存失败';
+      status.className = 'modal-status err';
+    }
+  } catch(e) {
+    status.textContent = '网络错误: ' + e.message;
+    status.className = 'modal-status err';
+  }
+}
+
+function backToClerkList() {
+  selectedClerkId = '';
+  document.getElementById('clerkDetail').classList.remove('open');
+}
+
+// Utility
+// ═══════════════════════════════════════
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════
+// Init: load sessions on startup
+// ═══════════════════════════════════════
+(async function init() {
+  await loadSessions();
+  if (sessions.length > 0) {
+    currentSessionId = sessions[0].id;
+    currentSessionName = sessions[0].name;
+    document.getElementById('currentSessionName').textContent = currentSessionName;
+    renderSessions();
+    await loadMessages();
+  }
+})();
+</script>
+</body>
+</html>

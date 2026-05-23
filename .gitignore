@@ -1,0 +1,35 @@
+# API keys and secrets
+.env
+*.env
+!sample.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ShiYi data (user data, don't commit)
+.shiyi/
+*.db
+*.db-journal
+*.db-wal
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PyInstaller
+*.spec.bak
+
+# Cython build artifacts
+.c
+.cpython-*.so
