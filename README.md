@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-green.svg)](https://www.python.org/)
-[![Version](https://img.shields.io/badge/version-0.15.1-orange.svg)](https://github.com/shiyi-ai-tech/shiyi)
+
 
 [English](#english) · [快速开始](#快速开始) · [架构](#架构) · [吏员系统](#吏员系统) · [贡献](#贡献)
 
