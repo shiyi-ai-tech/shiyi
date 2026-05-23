@@ -10,7 +10,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-green.svg)](https://www.python.org/)
 
 
-[English](#english) · [快速开始](#快速开始) · [架构](#架构) · [吏员系统](#吏员系统) · [贡献](#贡献)
+[快速开始](#快速开始) · [架构](#架构) · [吏员系统](#吏员系统) · [贡献](#贡献)
 
 </div>
 
