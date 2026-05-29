@@ -1,0 +1,76 @@
+{
+  "_comment": "══════════════════════════════════════════════════",
+  "_comment2": " 史佚吏员身份声明 (clerk.json) — 开发者必填",
+  "_comment3": "══════════════════════════════════════════════════",
+  "_comment4": "",
+  "_comment5": "【必填字段说明】",
+  "_comment6": "  clerk_id:     全局唯一标识。格式建议 'clerk_<开发者简称>_<功能>_<编号>'",
+  "_comment7": "  name:         吏员显示名称，用户可见",
+  "_comment8": "  version:      语义版本号，主版本.次版本.修订号",
+  "_comment9": "  description:  一句话说明吏员用途",
+  "_comment10": "  tools:        工具定义数组（MCP 标准 inputSchema 格式）",
+  "_comment11": "  capabilities: 工具名列表，与 tools[].name 一一对应",
+  "_comment12": "",
+  "_comment13": "【可选字段说明】",
+  "_comment14": "  enabled:      是否默认启用（true/false，默认 true）",
+  "_comment15": "  api_keys:     吏员需要哪些外部 API key（如 OPENAI_API_KEY）",
+  "_comment16": "                key 的安全值由用户在 WebUI 填写，存储于 ~/.shiyi/clerks/{clerk_id}.json",
+  "_comment17": "  requires_llm: 吏员内部是否需要调用大模型（true/false，默认 false）",
+  "_comment18": "  skills:       吏员的 skill 名称列表（skill 文件放 skills/ 目录）",
+  "_comment19": "  created_at:   创建日期 YYYY-MM-DD",
+  "_comment20": "  data_policy:  数据边界声明（默认 shiyi_only）",
+  "_comment21": "",
+  "_comment22": "【数据边界规则 — 必须遵守】",
+  "_comment23": "  data_policy 声明吏员如何存储数据。可选值：",
+  "_comment24": "    shiyi_only   — 吏员不本地存储任何用户数据。所有产出物写入 $SHIYI_WORKSPACE",
+  "_comment25": "    operational  — 吏员可存自身运行状态（工具配置、任务队列），但用户文档/知识仍走史佚DB",
+  "_comment26": "    ⚠️ 禁止   — 吏员不得有自己的 SQLite/向量库存储用户对话、知识碎片、产出文档",
+  "_comment27": "  文件操作规范：",
+  "_comment28": "    file_write 必须限定在 $SHIYI_WORKSPACE（默认 ~/.shiyi/workspace/）内",
+  "_comment29": "    吏员自身配置/任务元数据可存 clerk 目录，用 .clerk_state/ 子目录",
+  "_comment30": "  吏员本地可存（仅 operational 状态）：",
+  "_comment31": "    ✓ 工具配置文件（如 api 端点、模板路径）",
+  "_comment32": "    ✓ 任务执行队列/状态（task_id、进度、结果摘要）",
+  "_comment33": "    ✓ 统计计数器和缓存（不包含用户原文）",
+  "_comment34": "  吏员本地不可存（必须走史佚 DB/知识库）：",
+  "_comment35": "    ✗ 用户对话记录和记忆晶体",
+  "_comment36": "    ✗ 用户上传/生成的文档和文件",
+  "_comment37": "    ✗ 用户知识库内容",
+  "_comment38": "    ✗ 搜索结果缓存（含用户查询）",
+  "_comment39": "",
+  "_comment40": "【工具定义格式 — MCP 兼容】",
+  "_comment41": "  每个工具的 inputSchema 遵循 JSON Schema 规范，与 OpenAI Function Calling 格式兼容。",
+  "_comment42": "  字段：name(工具名) + description(描述) + inputSchema(参数定义)",
+  "_comment43": "══════════════════════════════════════════════════",
+
+  "clerk_id": "clerk_my_001",
+  "name": "我的吏员",
+  "version": "1.0.0",
+  "description": "一个自定义吏员的模板，替换此处为你的吏员描述",
+  "created_at": "2026-05-23",
+
+  "capabilities": ["my_tool"],
+
+  "tools": [
+    {
+      "name": "my_tool",
+      "description": "我的自定义工具 — 替换为你的工具描述，LLM 据此决定何时调用",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "param1": {
+            "type": "string",
+            "description": "参数1的描述"
+          }
+        },
+        "required": ["param1"]
+      }
+    }
+  ],
+
+  "enabled": true,
+  "api_keys": [],
+  "requires_llm": false,
+  "data_policy": "shiyi_only",
+  "skills": []
+}

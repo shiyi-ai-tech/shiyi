@@ -1,0 +1,24 @@
+Metadata-Version: 2.4
+Name: shiyi-shell
+Version: 260528.1
+Summary: Shiyi CLI shell
+Author: LiGuo, LeGang
+License: MIT
+Project-URL: Homepage, https://gitee.com/anty0418/shiyi-tongxun
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: shiyi-core
+Requires-Dist: shiyi-providers
+Requires-Dist: requests>=2.28.0
+Requires-Dist: fastapi>=0.100.0
+Requires-Dist: uvicorn>=0.23.0
+Requires-Dist: python-multipart>=0.0.6
+Requires-Dist: pydantic>=2.0.0
+Dynamic: license-file

@@ -1,0 +1,182 @@
+{
+  "clerk_id": "clerk_default_001",
+  "name": "管家吏员",
+  "version": "0.2.0",
+  "description": "提供文件读写、命令执行和网页搜索的基础吏员，支持自主执行循环",
+  "capabilities": [
+    "file_read",
+    "file_write",
+    "web_search",
+    "run_command",
+    "recall_memory",
+    "search_conversations"
+  ],
+  "tools": [
+    {
+      "name": "file_read",
+      "description": "读取文件内容或列出目录",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "文件路径（$SHIYI_WORKSPACE 内，相对或绝对路径）"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最大读取行数（默认500）",
+            "default": 500
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    },
+    {
+      "name": "file_write",
+      "description": "写入内容到文件。所有产出存入 $SHIYI_WORKSPACE，不存吏员本地",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "文件路径（$SHIYI_WORKSPACE 内，相对或绝对路径）"
+          },
+          "content": {
+            "type": "string",
+            "description": "要写入的内容"
+          }
+        },
+        "required": [
+          "path",
+          "content"
+        ]
+      }
+    },
+    {
+      "name": "web_search",
+      "description": "搜索互联网信息",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "搜索关键词"
+          },
+          "max_results": {
+            "type": "integer",
+            "description": "最大结果数（默认3）",
+            "default": 3
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "run_command",
+      "description": "在工作沙箱内执行安全外壳命令。支持 Python 脚本、系统命令等。自动超时 60s，输出上限 100KB。禁止执行的命令：rm -rf /, dd, mkfs, shutdown 等",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "要执行的 shell 命令"
+          },
+          "workdir": {
+            "type": "string",
+            "description": "命令工作目录（沙箱内的相对路径，可选）"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "超时秒数（默认 60，最大 300）",
+            "default": 60
+          }
+        },
+        "required": [
+          "command"
+        ]
+      }
+    },
+    {
+      "name": "recall_memory",
+      "description": "查询史佚记忆库，检索与查询相关的事实记忆。支持语义搜索和深度检索模式。",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "记忆查询文本"
+          },
+          "top_k": {
+            "type": "integer",
+            "description": "返回结果数量（默认5）",
+            "default": 5
+          },
+          "deep": {
+            "type": "boolean",
+            "description": "是否启用深度检索模式（默认False）",
+            "default": false
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "search_conversations",
+      "description": "搜索史佚的对话历史记录，找到包含关键词的对话片段。",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "搜索关键词"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "返回结果数量（默认10）",
+            "default": 10
+          },
+          "session_id": {
+            "type": "string",
+            "description": "指定会话ID（可选，为空则搜索所有会话）"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    }
+  ],
+  "enabled": true,
+  "created_at": "2026-05-19",
+  "config_path": "clerk-default/",
+  "skills": [
+    "file_ops",
+    "web_search"
+  ],
+  "api_keys": [
+    {
+      "name": "CLERK_DEFAULT_API_KEY",
+      "description": "LLM API key for clerk autonomous execution (e.g. DEEPSEEK_API_KEY)",
+      "required": false
+    }
+  ],
+  "requires_llm": true,
+  "data_policy": "shiyi_only",
+  "llm_config": {
+    "provider": "",
+    "model": "",
+    "base_url": "",
+    "max_tokens": 2048,
+    "temperature": 0.3
+  },
+  "agent_loop": {
+    "max_iterations": 10,
+    "default_timeout": 300
+  }
+}

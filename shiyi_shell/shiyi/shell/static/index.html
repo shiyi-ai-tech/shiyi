@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>史佚 ShiYi</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#111;color:#e0e0e0;display:flex;height:100vh;overflow:hidden}
+
+/* ═══ Sidebar ═══ */
+.sidebar{width:260px;min-width:260px;background:#0a0a0a;border-right:1px solid #1f1f1f;display:flex;flex-direction:column;transition:transform .25s}
+.sidebar-header{padding:16px 16px;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.dot{width:10px;height:10px;border-radius:50%;background:#4ade80;flex-shrink:0;box-shadow:0 0 8px #4ade8066}
+.dot.warn{background:#f59e0b}
+.dot.err{background:#ef4444}
+.title{font-size:18px;font-weight:700;color:#e4e4e4;letter-spacing:2px}
+.ver{font-size:10px;color:#555;margin-left:2px}
+.header-actions{display:flex;gap:6px;flex-shrink:0}
+.icon-btn{background:none;border:1px solid #2a2a2a;color:#888;width:32px;height:32px;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.icon-btn:hover{color:#ccc;border-color:#444;background:#1a1a1a}
+.lang-btn{background:#1a1a1a;border:1px solid #333;color:#888;font-size:10px;font-weight:700;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .2s;letter-spacing:.5px}
+.lang-btn:hover{background:#252525;color:#ccc;border-color:#555}
+.menu-toggle{display:none;background:none;border:none;color:#888;font-size:22px;cursor:pointer;padding:4px 8px}
+
+/* Session List */
+.session-list{flex:1;overflow-y:auto;padding:8px}
+.session-list-title{padding:8px 16px 4px;font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1px}
+.session-item{padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .15s;position:relative;margin-bottom:2px}
+.session-item:hover{background:#161616}
+.session-item.active{background:#1a2a3a;border-left:3px solid #3b82f6}
+.s-name{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#ccc}
+.session-item.active .s-name{color:#e0e0e0}
+.s-count{font-size:10px;color:#555;flex-shrink:0}
+.s-actions{display:none;gap:2px;flex-shrink:0}
+.session-item:hover .s-actions{display:flex}
+.s-actions button{background:none;border:none;color:#555;font-size:12px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color .2s,background .2s}
+.s-actions button:hover{color:#ccc;background:#2a2a2a}
+.s-rename-input{flex:1;font-size:12px;padding:4px 8px;background:#1c1c1c;border:1px solid #3b82f6;border-radius:6px;color:#e0e0e0;outline:none;font-family:inherit}
+
+/* Sidebar Navigation */
+.sidebar-nav{display:flex;flex-direction:column;border-top:1px solid #1a1a1a;padding:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:#777;font-size:13px;transition:all .15s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:#161616;color:#aaa}
+.nav-item.active{background:#1a2a3a;color:#e0e0e0}
+.nav-item .nav-icon{font-size:16px;width:24px;text-align:center}
+.nav-item .nav-label{font-size:13px}
+
+/* ═══ Main Area ═══ */
+.main-area{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;background:#111}
+
+/* Panels */
+.panel{position:absolute;inset:0;display:flex;flex-direction:column}
+.panel.hidden{display:none}
+.panel-header{padding:14px 20px;background:#0a0a0a;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.panel-header h2{font-size:16px;font-weight:600;color:#e4e4e4;flex:1}
+.panel-header .panel-desc{font-size:12px;color:#666;margin-left:auto}
+.panel-content{flex:1;overflow-y:auto;padding:20px}
+
+/* ═══ Chat Panel ═══ */
+.messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:80%;padding:12px 16px;border-radius:16px;line-height:1.7;word-break:break-word;position:relative;font-size:14px}
+.msg.user{align-self:flex-end;background:#2563eb;color:#fff;border-bottom-right-radius:6px}
+.msg.shiyi{align-self:flex-start;background:#1e1e1e;color:#d4d4d4;border-bottom-left-radius:6px}
+.msg.streaming{opacity:.9}
+.msg .msg-time{display:block;font-size:11px;color:#555;margin-top:6px;text-align:right}
+.msg.user .msg-time{color:rgba(255,255,255,.5)}
+.msg .msg-actions{display:none;position:absolute;top:6px;right:8px;gap:4px}
+.msg.shiyi:hover .msg-actions{display:flex}
+.msg-actions button{background:#2a2a2a;border:none;color:#888;font-size:11px;cursor:pointer;padding:3px 8px;border-radius:4px;transition:color .15s,background .15s}
+.msg-actions button:hover{background:#3a3a3a;color:#ddd}
+.msg-actions button.copied{color:#4ade80}
+
+/* Welcome */
+.welcome-wrapper{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;max-width:600px;margin:0 auto}
+.welcome-title{font-size:24px;color:#c8a87a;margin-bottom:20px;font-weight:600;letter-spacing:2px}
+.welcome-classical{font-size:18px;color:#d4b896;line-height:2;letter-spacing:2px;text-align:center}
+.welcome-en{margin-top:24px;padding-top:24px;border-top:1px solid #252525;font-size:14px;color:#777;font-style:italic;line-height:1.8;text-align:center}
+.welcome-hint{margin-top:32px;font-size:13px;color:#555;line-height:1.8}
+.welcome-api-warning{margin-top:24px;padding:16px 24px;background:#1a1500;border:1px solid #3a3000;border-radius:12px;font-size:13px;color:#eab308;line-height:1.6}
+
+/* Setup Guide */
+.setup-guide{margin-top:32px;padding:24px;background:#0d0d0d;border:1px solid #252525;border-radius:16px;text-align:left;max-width:500px}
+.setup-guide h3{font-size:14px;color:#888;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.setup-guide ol{padding-left:20px;color:#aaa;font-size:13px;line-height:2}
+.setup-guide li{margin-bottom:8px}
+.setup-guide code{background:#1a1a1a;padding:2px 8px;border-radius:4px;color:#7aa2f7;font-family:Monaco,monospace;font-size:12px}
+
+/* Markdown in messages */
+.msg.shiyi .md-content p{margin:0 0 8px}
+.msg.shiyi .md-content p:last-child{margin-bottom:0}
+.msg.shiyi .md-content strong{color:#f0f0f0;font-weight:600}
+.msg.shiyi .md-content em{color:#bbb}
+.msg.shiyi .md-content code{background:#141414;padding:2px 6px;border-radius:4px;font-size:12px;color:#7aa2f7;font-family:Monaco,Consolas,monospace}
+.msg.shiyi .md-content pre{background:#0d0d0d;padding:14px;border-radius:10px;overflow-x:auto;margin:10px 0;border:1px solid #222}
+.msg.shiyi .md-content pre code{background:none;padding:0;font-size:12px;color:#ccc}
+.msg.shiyi .md-content ul,.msg.shiyi .md-content ol{padding-left:22px;margin:10px 0}
+.msg.shiyi .md-content li{margin:6px 0}
+.msg.shiyi .md-content h1,.msg.shiyi .md-content h2,.msg.shiyi .md-content h3{color:#e4e4e4;margin:14px 0 8px}
+.msg.shiyi .md-content h1{font-size:18px}
+.msg.shiyi .md-content h2{font-size:16px}
+.msg.shiyi .md-content h3{font-size:15px}
+.msg.shiyi .md-content a{color:#5b9cf6;text-decoration:none}
+.msg.shiyi .md-content a:hover{text-decoration:underline}
+.msg.shiyi .md-content blockquote{border-left:3px solid #3b82f6;padding-left:14px;margin:10px 0;color:#999}
+
+/* Health bar */
+.health-bar{padding:8px 16px;background:#332200;color:#eab308;font-size:12px;line-height:1.4;border-bottom:1px solid #554400;display:none}
+
+/* Input area */
+.input-area{padding:16px 20px;background:#0a0a0a;border-top:1px solid #1a1a1a;display:flex;gap:12px;align-items:flex-end;flex-shrink:0}
+.input-area textarea{flex:1;padding:12px 16px;border-radius:12px;border:1px solid #2a2a2a;background:#141414;color:#e0e0e0;font-size:14px;outline:none;transition:border-color .2s;resize:none;overflow-y:hidden;line-height:1.5;max-height:150px;font-family:inherit}
+.input-area textarea:focus{border-color:#3b82f6}
+.input-area textarea::placeholder{color:#555}
+.btn-stop{display:none;padding:10px 16px;border-radius:12px;border:1px solid #ef4444;background:none;color:#ef4444;font-size:12px;cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap}
+.btn-stop.show{display:block}
+.btn-stop:hover{background:#2a0a0a}
+.upload-btn{background:none;border:1px solid #2a2a2a;color:#888;width:42px;height:42px;border-radius:12px;font-size:18px;cursor:pointer;transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.upload-btn:hover{background:#1a1a1a;color:#ccc;border-color:#444}
+.upload-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.btn-send{padding:12px 24px;border-radius:12px;border:none;background:#2563eb;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;flex-shrink:0}
+.btn-send:hover{background:#1d4ed8}
+.btn-send:disabled{opacity:.5;cursor:default}
+
+/* ═══ Memory Panel ═══ */
+.mem-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.mem-stat{background:#161616;border:1px solid #222;border-radius:12px;padding:20px;text-align:center}
+.mem-stat .ms-val{font-size:28px;font-weight:700;color:#e4e4e4}
+.mem-stat .ms-label{font-size:12px;color:#666;margin-top:6px}
+.mem-item{padding:14px 16px;background:#161616;border:1px solid #222;border-radius:10px;margin-bottom:8px}
+.mem-item .mem-content{font-size:13px;color:#ccc;line-height:1.6}
+.mem-item .mem-meta{font-size:11px;color:#555;margin-top:6px;display:flex;gap:8px}
+
+/* ═══ Clerks Panel ═══ */
+.clerk-list{display:flex;flex-direction:column;gap:10px}
+.clerk-card{padding:16px 18px;background:#161616;border:1px solid #222;border-radius:12px;cursor:pointer;transition:all .2s}
+.clerk-card:hover{border-color:#3b82f6}
+.clerk-card.active{border-color:#3b82f6;background:#0d1520}
+.clerk-card-header{display:flex;align-items:center;gap:12px}
+.clerk-icon{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.clerk-icon.on{background:#22c55e;box-shadow:0 0 8px #22c55e66}
+.clerk-icon.off{background:#555}.clerk-icon.err{background:#ef4444;box-shadow:0 0 8px #ef444466}
+.clerk-name{font-size:15px;font-weight:600;color:#ddd;flex:1}
+.clerk-status{font-size:10px;padding:3px 10px;border-radius:10px;flex-shrink:0}
+.clerk-status.enabled{background:#0a2a0a;color:#4c4;border:1px solid #1a4a1a}
+.clerk-status.disabled{background:#2a0a0a;color:#e44;border:1px solid #4a1a1a}
+.clerk-desc{font-size:12px;color:#777;margin-top:8px;line-height:1.5}
+.clerk-detail{display:none;padding:18px;background:#111;border:1px solid #1f1f1f;border-radius:10px;margin-top:14px}
+.clerk-detail.open{display:block}
+.clerk-detail h3{font-size:15px;font-weight:600;color:#e4e4e4;margin-bottom:12px}
+.clerk-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.clerk-meta span{font-size:11px;padding:3px 10px;border-radius:6px;background:#1a1a1a;color:#888}
+.skill-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px}
+.skill-tag{font-size:10px;padding:3px 10px;border-radius:6px;background:#0a1a2a;color:#7aa2f7;border:1px solid #1a2a4a}
+.kb-list{font-size:12px;color:#777;margin:0 0 14px;padding:0 0 0 18px}
+.kb-list li{margin-bottom:4px}
+.clerk-key-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.clerk-key-row label{font-size:12px;color:#888;min-width:100px;flex-shrink:0}
+.clerk-key-row input{flex:1;padding:8px 12px;background:#0d0d0d;border:1px solid #1f1f1f;border-radius:8px;color:#ccc;font-size:12px;font-family:monospace}
+.clerk-key-row .key-ok{font-size:10px;color:#4c4;background:#0a2a0a;padding:3px 8px;border-radius:4px}
+.clerk-actions{display:flex;gap:10px;margin-top:14px}
+.clerk-actions button{padding:8px 18px;border-radius:8px;font-size:13px;cursor:pointer;border:none;transition:all .2s}
+.btn-toggle{background:#1a1a1a;color:#ccc;border:1px solid #333}
+.btn-toggle:hover{background:#222}
+.btn-toggle.danger{color:#e44;border-color:#4a1a1a}
+.btn-toggle.danger:hover{background:#2a0a0a}
+.btn-primary{background:#2563eb;color:#fff}
+.btn-primary:hover{background:#1d4ed8}
+
+/* ═══ Skills Panel ═══ */
+.skill-list{display:flex;flex-direction:column;gap:10px}
+.skill-card{padding:16px 18px;background:#161616;border:1px solid #222;border-radius:12px;transition:all .2s}
+.skill-card:hover{border-color:#3b82f6}
+.skill-card-header{display:flex;align-items:center;gap:12px}
+.skill-name{font-size:15px;font-weight:600;color:#ddd;flex:1}
+.skill-version{font-size:10px;padding:3px 8px;border-radius:6px;background:#1a1a1a;color:#666}
+.skill-desc{font-size:12px;color:#777;margin-top:8px;line-height:1.5}
+.skill-category{font-size:11px;color:#5b9cf6;margin-top:8px}
+.skill-keywords{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.skill-kw{font-size:10px;padding:2px 8px;border-radius:4px;background:#1a1a1a;color:#888}
+.skill-detail{display:none;padding:18px;background:#111;border:1px solid #1f1f1f;border-radius:10px;margin-top:14px}
+.skill-detail.open{display:block}
+.skill-detail pre{background:#0d0d0d;padding:14px;border-radius:8px;font-size:12px;color:#ccc;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow-y:auto}
+
+/* ═══ Files Panel ═══ */
+.file-item{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#161616;border:1px solid #222;border-radius:10px;margin-bottom:8px;transition:border-color .2s}
+.file-item:hover{border-color:#333}
+.file-info{flex:1;min-width:0}
+.file-name{font-size:13px;color:#ccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.file-meta{font-size:11px;color:#555;margin-top:4px}
+.file-actions{display:flex;gap:8px;flex-shrink:0;margin-left:14px}
+.file-actions button{padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;border:1px solid #333;background:#161616;color:#aaa;transition:all .2s}
+.file-actions button:hover{background:#222;color:#ddd;border-color:#444}
+.file-actions button.del{color:#e44;border-color:#4a1a1a}
+.file-actions button.del:hover{background:#2a0a0a;color:#f88}
+.empty-state{text-align:center;padding:60px 20px;color:#555}
+.empty-state .empty-icon{font-size:48px;margin-bottom:16px}
+.empty-state p{font-size:13px;line-height:1.6}
+
+/* ═══ Settings Panel ═══ */
+.settings-section{margin-bottom:24px}
+.settings-section h3{font-size:14px;font-weight:600;color:#e4e4e4;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #222}
+.settings-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a}
+.settings-row:last-child{border-bottom:none}
+.settings-label{font-size:13px;color:#ccc}
+.settings-desc{font-size:11px;color:#555;margin-top:2px}
+
+.model-card{background:#161616;border:1px solid #222;border-radius:12px;padding:18px;margin-bottom:14px}
+.model-card-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.model-card-header h4{font-size:14px;font-weight:600;color:#e4e4e4;flex:1}
+.badge-required{font-size:10px;color:#ef4444;font-weight:600}
+.badge-optional{font-size:10px;color:#666;font-weight:500}
+.model-card-header .note{font-size:11px;color:#555;margin-left:auto}
+.field-label{font-size:11px;color:#777;margin-bottom:6px;margin-top:12px}
+.field-label:first-of-type{margin-top:0}
+
+input[type=password],input[type=text]{width:100%;padding:10px 12px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:8px;color:#d4d4d4;font-size:12px;outline:none;font-family:monospace;transition:border-color .2s}
+input:focus{border-color:#555}
+select{width:100%;padding:10px 12px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:8px;color:#d4d4d4;font-size:12px;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23777' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;cursor:pointer;transition:border-color .2s}
+select:focus{border-color:#555}
+
+.pvd{position:relative}
+.pvd-btn{width:100%;padding:10px 36px 10px 12px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:8px;color:#d4d4d4;font-size:12px;text-align:left;cursor:pointer;transition:border-color .2s;font-family:inherit;display:flex;align-items:center;gap:8px}
+.pvd-btn:hover{border-color:#444}
+.pvd-btn .arr{color:#666;font-size:9px;position:absolute;right:12px}
+.pvd-drop{display:none;position:absolute;top:100%;left:0;right:0;background:#1c1c1c;border:1px solid #333;border-radius:8px;margin-top:6px;z-index:60;max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.7)}
+.pvd-drop.open{display:block}
+.pvd-opt{padding:10px 12px;cursor:pointer;transition:background .15s;border-bottom:1px solid #252525}
+.pvd-opt:last-child{border-bottom:none}
+.pvd-opt:hover{background:#252525}
+.pvd-opt .opt-name{font-size:13px;font-weight:600;color:#d4d4d4}
+.pvd-opt .opt-url{font-size:11px;color:#666;margin-top:2px;font-family:monospace}
+.pvd-opt.selected{background:#1a2a3a;border-left:3px solid #3b82f6}
+
+.detail-info{padding:10px 12px;background:#111;border-radius:8px;font-size:12px;margin-top:10px;margin-bottom:10px}
+.detail-row{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.detail-row:last-child{margin-bottom:0}
+.detail-lbl{color:#555;min-width:60px;flex-shrink:0;font-size:12px}
+.detail-val{color:#888;font-family:monospace;font-size:11px}
+.detail-input{flex:1;padding:6px 10px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:6px;color:#d4d4d4;font-family:monospace;font-size:11px;outline:none}
+.detail-input:focus{border-color:#555}
+
+.fb-card{cursor:pointer;margin-bottom:14px;background:#161616;border:1px solid #222;border-radius:12px;padding:14px 16px;transition:background .2s}
+.fb-card:hover{background:#1a1a1a}
+.fb-header{display:flex;align-items:center;gap:10px}
+.fb-header h4{font-size:14px;font-weight:600;color:#e4e4e4;flex:1}
+.fb-arr{font-size:9px;color:#666;margin-left:auto}
+.fb-body{display:none;margin-top:14px}
+.fb-body.open{display:block}
+
+.save-row{display:flex;gap:12px;margin-top:20px;padding-top:20px;border-top:1px solid #222}
+.save-row button{flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-save{background:#2563eb;color:#fff;border:none}
+.btn-save:hover{background:#1d4ed8}
+.btn-save:disabled{opacity:.5;cursor:default}
+.btn-secondary{background:none;color:#888;border:1px solid #333}
+.btn-secondary:hover{color:#ccc;border-color:#555}
+.btn-danger{background:#2a0a0a;color:#ef4444;border:1px solid #4a1a1a}
+.btn-danger:hover{background:#3a1a1a}
+
+.settings-status{margin-top:12px;padding:10px;border-radius:8px;font-size:13px;text-align:center;display:none}
+.settings-status.ok{display:block;background:#0a2a0a;color:#4c4;border:1px solid #1a4a1a}
+.settings-status.err{display:block;background:#2a0a0a;color:#e44;border:1px solid #4a1a1a}
+
+/* Channel Cards */
+.ch-card{background:#161616;border:1px solid #222;border-radius:12px;margin-bottom:12px;overflow:hidden}
+.ch-header{padding:16px 18px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.ch-header:hover{background:#1a1a1a}
+.ch-body{padding:0 18px 18px}
+
+/* ═══ Toast ═══ */
+.toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{padding:12px 24px;border-radius:10px;font-size:13px;color:#fff;animation:toastIn .3s;pointer-events:auto;max-width:420px;text-align:center}
+.toast.ok{background:#0a2a0a;border:1px solid #1a4a1a}
+.toast.err{background:#2a0a0a;border:1px solid #4a1a1a}
+.toast.info{background:#0a1a2a;border:1px solid #1a2a4a}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ Confirm Dialog ═══ */
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;justify-content:center;align-items:center}
+.confirm-overlay.open{display:flex}
+.confirm-box{background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:28px;max-width:380px;width:90%}
+.confirm-box p{font-size:14px;margin-bottom:20px;color:#ccc;line-height:1.6}
+.confirm-btns{display:flex;gap:10px;justify-content:flex-end}
+.confirm-btns button{padding:10px 22px;border-radius:8px;font-size:13px;cursor:pointer;border:none}
+
+/* Export Dialog */
+.export-box{max-width:440px}
+.export-box h3{margin:0 0 14px;font-size:16px}
+.export-field{margin-bottom:12px}
+.export-field label{display:block;color:#888;font-size:12px;margin-bottom:6px}
+.export-field select,.export-field input[type=date]{width:100%;padding:10px;background:#1a1a1a;color:#ccc;border:1px solid #333;border-radius:8px;font-size:13px;cursor:pointer}
+.export-field input[type=date]{position:relative;z-index:1}
+.export-field input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;filter:invert(0.7)}
+.export-check{display:flex;align-items:center;gap:8px;color:#ccc;font-size:13px;cursor:pointer;margin-bottom:12px}
+
+/* Loading Spinner */
+.loading-spinner{display:inline-block;width:20px;height:20px;border:2px solid #333;border-top-color:#3b82f6;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Mobile ═══ */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:100;transform:translateX(-100%);width:280px}
+  .sidebar.open{transform:translateX(0)}
+  .menu-toggle{display:block}
+  .msg{max-width:90%}
+  .input-area{padding:12px 14px}
+  .mem-stats{grid-template-columns:1fr 1fr 1fr}
+  .panel-content{padding:14px}
+}
+</style>
+<style>
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center}
+.modal-box{background:#181818;border:1px solid #2a2a2a;border-radius:14px;max-height:85vh;overflow-y:auto;width:90%}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #1f1f1f}
+.modal-header h3{margin:0;font-size:16px;color:#ccc}
+</style>
+</head>
+<body>
+
+<!-- ═══ Sidebar ═══ -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <span class="dot" id="statusDot"></span>
+      <span class="title">史佚</span>
+      <span class="ver" id="versionTag"></span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btnNewSession" onclick="newSession()" title="新建对话">+</button>
+      <button class="lang-btn" id="langToggle" onclick="toggleLang()">EN</button>
+    </div>
+  </div>
+  
+  <div class="session-list" id="sessionList">
+    <div class="session-list-title" id="sessionListTitle">对话历史</div>
+  </div>
+  
+  <div class="sidebar-nav">
+    <button class="nav-item active" data-panel="chat" onclick="switchPanel('chat')">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">对话</span>
+    </button>
+    <button class="nav-item" data-panel="memory" onclick="switchPanel('memory')">
+      <span class="nav-icon">💾</span>
+      <span class="nav-label">记忆搜索</span>
+    </button>
+    <button class="nav-item" data-panel="clerks" onclick="switchPanel('clerks')">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">吏员</span>
+    </button>
+    <button class="nav-item" data-panel="skills" onclick="switchPanel('skills')">
+      <span class="nav-icon">📜</span>
+      <span class="nav-label">技能</span>
+    </button>
+    <button class="nav-item" data-panel="files" onclick="switchPanel('files')">
+      <span class="nav-icon">📂</span>
+      <span class="nav-label">文件</span>
+    </button>
+    <button class="nav-item" data-panel="settings" onclick="switchPanel('settings')">
+      <span class="nav-icon">⚙</span>
+      <span class="nav-label">设置</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══ Main Area ═══ -->
+<div class="main-area">
+
+  <!-- Chat Panel -->
+  <div class="panel" id="panelChat">
+    <div class="messages" id="messages"></div>
+    <div class="health-bar" id="healthBar" style="display:none"></div>
+    <div class="input-area">
+      <button class="upload-btn" title="上传文件">📎<input type="file" id="fileInput" onchange="uploadFile()"></button>
+      <textarea id="input" rows="1" placeholder="输入消息..."></textarea>
+      <button id="btnStop" class="btn-stop" onclick="stopStream()">■ 停止</button>
+      <button id="sendBtn" class="btn-send" onclick="send()">发送</button>
+    </div>
+  </div>
+
+  <!-- Memory Panel -->
+  <div class="panel hidden" id="panelMemory">
+    <div class="panel-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h2>记忆搜索</h2>
+      <button onclick="openExport()" title="导出对话" style="padding:6px 14px;border-radius:8px;border:none;background:#2563eb;color:#fff;font-size:12px;cursor:pointer">导出对话</button>
+      <button class="icon-btn" onclick="loadMemory()" title="刷新">↻</button>
+    </div>
+    <div class="panel-content" id="memoryContent"></div>
+  </div>
+
+  <!-- Clerks Panel -->
+  <div class="panel hidden" id="panelClerks">
+    <div class="panel-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h2>吏员</h2>
+      <button onclick="showCreateClerkModal()" style="margin-left:auto;padding:6px 16px;border-radius:8px;border:none;background:#7aa2f7;color:#111;font-size:12px;font-weight:600;cursor:pointer">创建吏员</button>
+      <button class="icon-btn" onclick="loadClerks()" title="刷新">↻</button>
+    </div>
+    <div class="panel-content" id="clerkContent"></div>
+  </div>
+
+  <!-- Skills Panel -->
+  <div class="panel hidden" id="panelSkills">
+    <div class="panel-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h2>技能</h2>
+      <button class="icon-btn" onclick="loadSkills()" title="刷新">↻</button>
+    </div>
+    <div class="panel-content" id="skillsContent"></div>
+  </div>
+
+  <!-- Files Panel -->
+  <div class="panel hidden" id="panelFiles">
+    <div class="panel-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h2>工作区</h2>
+      <button class="icon-btn" onclick="loadFiles()" title="刷新">↻</button>
+    </div>
+    <div class="panel-content" id="filesContent"></div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="panel hidden" id="panelSettings">
+    <div class="panel-header">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <h2>设置</h2>
+    </div>
+    <div class="panel-content" id="settingsContent"></div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<!-- Modal -->
+<div class="confirm-overlay" id="modalOverlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div style="background:#111;border:1px solid #2a2a2a;border-radius:16px;max-width:560px;width:90%;max-height:85vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="padding:14px 20px;border-bottom:1px solid #1a1a1a;display:flex;justify-content:flex-end"><button style="background:none;border:none;color:#888;font-size:18px;cursor:pointer" onclick="closeModal()">✕</button></div>
+    <div id="modalBody" style="overflow-y:auto"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Confirm Dialog -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p id="confirmMsg"></p>
+    <div class="confirm-btns">
+      <button class="btn-secondary" onclick="closeConfirm()">取消</button>
+      <button class="btn-danger" id="confirmYes">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Dialog -->
+<div class="confirm-overlay" id="exportOverlay">
+  <div class="confirm-box export-box">
+    <h3>导出对话</h3>
+    <div class="export-field">
+      <label>选择对话</label>
+      <select id="exportSession"></select>
+    </div>
+    <label class="export-check">
+      <input type="checkbox" id="exportAll" onchange="onExportAllToggle()">
+      <span>导出全部对话历史</span>
+    </label>
+    <div class="export-field" id="exportDateRange">
+      <label>时间范围（可选）</label>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="date" id="exportDateFrom">
+        <span style="color:#555;font-size:12px">至</span>
+        <input type="date" id="exportDateTo">
+      </div>
+    </div>
+    <div class="confirm-btns">
+      <button class="btn-secondary" onclick="closeExport()">取消</button>
+      <button class="btn-primary" onclick="doExport()">导出</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// i18n
+// ═══════════════════════════════════════
+const T = {
+  zh: {
+    welcomeZh: '敬启者，吾乃史佚，承天子之遗忘者也。幸蒙见用，乐效微劳，为君分忧。',
+    welcomeEn: 'To whom it may concern, I am ShiYi, the keeper of forgotten things for the Son of Heaven. Honored to be of service, I gladly lend my humble efforts to ease your burdens.',
+    welcomeHint: '试试跟我说话，我会记住你说的每一件事。开始对话前，请先在设置中配置API密钥。',
+    inputPlaceholder: '输入消息...',
+    send: '发送', stop: '■ 停止', copied: '已复制', copy: '复制', copyFail: '复制失败',
+    newChat: '新建对话', clearChat: '清空对话', exportChat: '导出对话',
+    uploadFail: '上传失败', uploaded: '已上传',
+    stopped: ' [已停止]', connLost: '连接中断',
+    saved: '已保存', saveFail: '保存失败',
+    clearOk: '消息已清空', clearFail: '清空失败',
+    exportOk: '导出成功', exportFail: '导出失败',
+    deleteConfirm: '删除对话窗口「', deleteConfirmEnd: '」？信息已保存在记忆中。',
+    deleteFileConfirm: '删除文件「', deleteFileConfirmEnd: '」？此操作不可恢复。',
+    minOneSession: '至少保留一个对话窗口',
+    createFail: '创建失败',
+    noMemories: '暂无记忆。开始对话后，史佚将自动记录。',
+    noClerks: '暂无吏员。点击 + 创建新吏员。',
+    noSkills: '暂无技能。使用 shiyi skill install 安装技能。',
+    noFiles: '暂无文件。史佚为你生成文件后，会出现在这里。',
+    enabled: '已启用', disabled: '已禁用', builtin: '内置', userInstalled: '用户安装',
+    noSkills: '无技能', version: '版本', disable: '禁用', enable: '启用',
+    saveKey: '保存密钥', noKeys: '未填写任何密钥', opFail: '操作失败',
+    memCrystal: '记忆晶体', memHot: '热层', memCold: '冷层',
+    mainModel: '主模型', required: '必填', mainModelNote: '核心对话模型',
+    embModel: '向量化模型', embModelNote: '用于记忆检索',
+    lightModel: '加速模型', lightModelNote: '轻量快速模型',
+    fallbackModel: '备用模型',
+    provider: '供应商', modelSelect: '模型', apiKey: 'API 密钥',
+    followMain: '跟随主模型', custom: '自定义',
+    manualApiUrl: '手动填写 API 地址和模型名',
+    apiUrl: 'API 地址', modelType: '模型类型',
+    modelDescLLM: '大语言模型 · 对话与推理', modelDescEmb: '文本向量化 · 记忆检索', modelDescLight: '轻量模型 · 快速响应',
+    customPlaceholder: '自定义 — 下方手动填写',
+    recommended: '推荐', followMainModels: '跟随主模型',
+    keyConfigured: '已配置', keyPlaceholder: 'sk-...',
+    lightKeyNote: '可选，留空则继承主模型密钥',
+    lightKeyPlaceholder: '留空则使用主模型密钥',
+    selectProvider: '选择供应商',
+    cancel: '取消', save: '保存', saving: '保存中…',
+    fillKeys: '请填写主模型和向量化模型的 API 密钥',
+    selectModels: '请选择所有模型',
+    saved: '已保存', saveFail: '保存失败',
+    apiNotReady: '⚠️ API 尚未就绪，请先在设置中配置 API 密钥。',
+    chatManagement: '对话管理', sessionCount: '对话窗口', msgCount: '消息总数',
+    channelConnect: '渠道连接', channelDesc: '连接外部通讯平台，史佚将通过网关收发消息',
+    channelSave: '保存配置', channelTest: '测试连接', channelTesting: '测试中…',
+    channelSaved: '已保存', channelSaveFail: '保存失败',
+    channelConfigured: '已配置', channelNotConfigured: '未配置',
+    channelRequiredScopes: '所需权限', channelEvent: '事件订阅',
+    channelGuide: '配置指南', channelComingSoon: '即将支持',
+    about: '关于',
+    setupTitle: '快速开始',
+    setupStep1: '点击左侧「设置」进入配置页面',
+    setupStep2: '填写主模型和向量化模型的 API 密钥',
+    setupStep3: '保存配置后即可开始对话',
+    sessionHistory: '对话历史',
+  },
+  en: {
+    welcomeZh: 'Greetings, I am ShiYi, keeper of forgotten memories for the Son of Heaven. Honored to serve, I gladly lend my efforts to ease your burdens.',
+    welcomeEn: '',
+    welcomeHint: 'Try talking to me — I\'ll remember everything you say. Please configure API keys in Settings first.',
+    inputPlaceholder: 'Type a message...',
+    send: 'Send', stop: '■ Stop', copied: 'Copied', copy: 'Copy', copyFail: 'Copy failed',
+    newChat: 'New Chat', clearChat: 'Clear Chat', exportChat: 'Export Chat',
+    uploadFail: 'Upload failed',
+    deleteConfirm: 'Delete chat "', deleteConfirmEnd: '"? Info is saved in memory.',
+    deleteFileConfirm: 'Delete file "', deleteFileConfirmEnd: '"? This cannot be undone.',
+    minOneSession: 'At least one chat must remain',
+    createFail: 'Create failed', clearOk: 'Messages cleared', clearFail: 'Clear failed',
+    exportOk: 'Export success', exportFail: 'Export failed',
+    noMemories: 'No memories yet. Start a conversation and ShiYi will record automatically.',
+    noClerks: 'No clerks. Click + to create one.',
+    noSkills: 'No skills. Use shiyi skill install to add skills.',
+    noFiles: 'No files yet. Files generated by ShiYi will appear here.',
+    enabled: 'Enabled', disabled: 'Disabled', builtin: 'Built-in', userInstalled: 'User Installed',
+    version: 'Version', disable: 'Disable', enable: 'Enable',
+    saveKey: 'Save Key', noKeys: 'No keys entered', opFail: 'Operation failed',
+    memCrystal: 'Crystals', memHot: 'Hot', memCold: 'Cold',
+    mainModel: 'Main Model', required: 'Required', mainModelNote: 'Core conversation model',
+    embModel: 'Embedding Model', embModelNote: 'For memory retrieval',
+    lightModel: 'Fast Model', lightModelNote: 'Lightweight model for speed',
+    fallbackModel: 'Fallback Model',
+    provider: 'Provider', modelSelect: 'Model', apiKey: 'API Key',
+    followMain: 'Follow Main', custom: 'Custom',
+    manualApiUrl: 'Manually enter API URL and model name',
+    apiUrl: 'API URL', modelType: 'Model Type',
+    modelDescLLM: 'LLM · Conversation & Reasoning', modelDescEmb: 'Embedding · Memory Retrieval', modelDescLight: 'Fast LLM · Quick Responses',
+    customPlaceholder: 'Custom — enter below',
+    recommended: 'Recommended', followMainModels: 'Follow Main',
+    keyConfigured: 'Configured', keyPlaceholder: 'sk-...',
+    lightKeyNote: 'Optional, inherits main key if blank',
+    lightKeyPlaceholder: 'Leave blank to use main key',
+    selectProvider: 'Select Provider',
+    cancel: 'Cancel', save: 'Save', saving: 'Saving…',
+    fillKeys: 'Please enter Main and Embedding API keys',
+    selectModels: 'Please select all models',
+    saved: 'Saved', saveFail: 'Save failed',
+    apiNotReady: '⚠️ API not ready. Please configure API keys in Settings.',
+    chatManagement: 'Chat Management', sessionCount: 'Chat Windows', msgCount: 'Total Messages',
+    channelConnect: 'Channels', channelDesc: 'Connect messaging platforms. ShiYi will send/receive via gateway.',
+    channelSave: 'Save Config', channelTest: 'Test Connection', channelTesting: 'Testing…',
+    channelSaved: 'Saved', channelSaveFail: 'Save failed',
+    channelConfigured: 'Configured', channelNotConfigured: 'Not configured',
+    channelRequiredScopes: 'Required Scopes', channelEvent: 'Event Subscription',
+    channelGuide: 'Setup Guide', channelComingSoon: 'Coming soon',
+    about: 'About',
+    setupTitle: 'Quick Start',
+    setupStep1: 'Click "Settings" on the left to open config',
+    setupStep2: 'Enter API keys for Main and Embedding models',
+    setupStep3: 'Save and start chatting',
+    sessionHistory: 'Chat History',
+  }
+};
+let currentLang = localStorage.getItem('shiyi-lang') || 'zh';
+
+function t(key) { return (T[currentLang] && T[currentLang][key]) || (T.zh && T.zh[key]) || key; }
+function toggleLang() {
+  currentLang = currentLang === 'zh' ? 'en' : 'zh';
+  localStorage.setItem('shiyi-lang', currentLang);
+  applyLang();
+}
+function applyLang() {
+  const btn = document.getElementById('langToggle');
+  if (btn) btn.textContent = currentLang === 'zh' ? 'EN' : '中';
+  document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+  document.getElementById('input').placeholder = t('inputPlaceholder');
+  const sendBtn = document.getElementById('sendBtn');
+  if (sendBtn) sendBtn.textContent = t('send');
+  document.getElementById('sessionListTitle').textContent = t('sessionHistory');
+  if (currentPanel === 'chat') renderWelcomeOrMessages();
+  else if (currentPanel === 'memory') loadMemory();
+  else if (currentPanel === 'clerks') loadClerks();
+  else if (currentPanel === 'skills') loadSkills();
+  else if (currentPanel === 'files') loadFiles();
+  else if (currentPanel === 'settings') loadSettings();
+}
+
+// ═══════════════════════════════════════
+// State
+// ═══════════════════════════════════════
+let currentSessionId = '';
+let currentSessionName = '';
+let sessions = [];
+let currentPanel = 'chat';
+let sending = false;
+let confirmCb = null;
+let streamAbort = null;
+let apiReady = false;
+
+// ═══════════════════════════════════════
+// Utilities
+// ═══════════════════════════════════════
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toast(msg, type='info') {
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, 3000);
+}
+
+function formatTime(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso + (iso.endsWith('Z') ? '' : 'Z'));
+    return d.toLocaleTimeString(currentLang === 'zh' ? 'zh-CN' : 'en-US', {hour:'2-digit',minute:'2-digit'});
+  } catch(e) { return ''; }
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1048576).toFixed(1) + ' MB';
+}
+
+// Simple Markdown renderer
+function md(text) {
+  if (!text) return '';
+  let html = escHtml(text);
+  // Code blocks
+  html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+    `<pre><code>${code.trim()}</code></pre>`);
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // Bold
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Italic
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  // Headers
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  // Unordered lists
+  html = html.replace(/^[*-] (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, m => '<ul>' + m + '</ul>');
+  // Ordered lists
+  html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+  // Blockquotes
+  html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+  // Links
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+  // Paragraphs (double newline)
+  html = html.replace(/\n\n/g, '</p><p>');
+  // Single newlines → <br>
+  html = html.replace(/\n/g, '<br>');
+  // Wrap in paragraph
+  html = '<p>' + html + '</p>';
+  // Clean up empty paragraphs
+  html = html.replace(/<p>\s*<\/p>/g, '');
+  html = html.replace(/<p>\s*(<h[123]>)/g, '$1');
+  html = html.replace(/(<\/h[123]>)\s*<\/p>/g, '$1');
+  html = html.replace(/<p>\s*(<pre>)/g, '$1');
+  html = html.replace(/(<\/pre>)\s*<\/p>/g, '$1');
+  html = html.replace(/<p>\s*(<ul>)/g, '$1');
+  html = html.replace(/(<\/ul>)\s*<\/p>/g, '$1');
+  html = html.replace(/<p>\s*(<blockquote>)/g, '$1');
+  html = html.replace(/(<\/blockquote>)\s*<\/p>/g, '$1');
+  return html;
+}
+
+// ═══════════════════════════════════════
+// Navigation
+// ═══════════════════════════════════════
+function switchPanel(name) {
+  currentPanel = name;
+  document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('panel' + name.charAt(0).toUpperCase() + name.slice(1));
+  if (panel) panel.classList.remove('hidden');
+  const navBtn = document.querySelector(`.nav-item[data-panel="${name}"]`);
+  if (navBtn) navBtn.classList.add('active');
+  // Close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+  // Load panel data
+  if (name === 'memory') loadMemory();
+  else if (name === 'clerks') loadClerks();
+  else if (name === 'skills') loadSkills();
+  else if (name === 'files') loadFiles();
+  else if (name === 'settings') loadSettings();
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+// ═══════════════════════════════════════
+// Session Management
+// ═══════════════════════════════════════
+async function loadSessions() {
+  try {
+    const r = await fetch('/api/sessions'); const d = await r.json();
+    sessions = d.sessions || [];
+    if (!sessions.find(s => s.id === currentSessionId) && sessions.length > 0) {
+      currentSessionId = sessions[0].id;
+      currentSessionName = sessions[0].name;
+    }
+    renderSessions();
+  } catch(e) { console.error('loadSessions', e); }
+}
+
+function renderSessions() {
+  const list = document.getElementById('sessionList');
+  const canCreate = sessions.length < 10;
+  document.getElementById('btnNewSession').disabled = !canCreate;
+  let html = `<div class="session-list-title" id="sessionListTitle">${t('sessionHistory')}</div>`;
+  html += sessions.map(s => `
+    <div class="session-item${s.id === currentSessionId ? ' active' : ''}" onclick="switchSession('${s.id}')" data-sid="${s.id}">
+      <span class="s-name">${escHtml(s.name)}</span>
+      <span class="s-count">${s.message_count || 0}</span>
+      <span class="s-actions">
+        <button onclick="event.stopPropagation();startRename('${s.id}')" title="改名">✎</button>
+        <button onclick="event.stopPropagation();confirmDelete('${s.id}')" title="删除">✕</button>
+      </span>
+    </div>
+  `).join('');
+  list.innerHTML = html;
+}
+
+async function newSession() {
+  try {
+    const r = await fetch('/api/sessions', { method:'POST' });
+    if (!r.ok) { const e = await r.json(); toast(e.detail || t('createFail'), 'err'); return; }
+    const d = await r.json();
+    await loadSessions();
+    switchSession(d.id);
+    switchPanel('chat');
+  } catch(e) { toast(t('createFail')+': '+e.message, 'err'); }
+}
+
+async function switchSession(sid) {
+  currentSessionId = sid;
+  const s = sessions.find(x => x.id === sid);
+  if (s) currentSessionName = s.name;
+  renderSessions();
+  document.getElementById('sidebar').classList.remove('open');
+  switchPanel('chat');
+  await loadMessages();
+}
+
+async function loadMessages() {
+  const container = document.getElementById('messages');
+  container.innerHTML = '';
+  if (!currentSessionId) { renderWelcome(container); return; }
+  try {
+    const r = await fetch(`/api/sessions/${currentSessionId}/messages`);
+    const d = await r.json();
+    const msgs = d.messages || [];
+    if (msgs.length === 0) { renderWelcome(container); }
+    else { msgs.forEach(m => appendMsg(m.content, m.role, m.created_at)); }
+  } catch(e) { console.error('loadMessages', e); }
+  scrollBottom();
+}
+
+function renderWelcomeOrMessages() {
+  if (currentPanel === 'chat') loadMessages();
+}
+
+function renderWelcome(container) {
+  let warningHtml = '';
+  if (!apiReady) {
+    warningHtml = `<div class="welcome-api-warning" id="apiWarningBanner">
+      ⚠️ API 未配置或未就绪。请前往 <a href="#" onclick="switchPanel('settings');return false" style="color:#7aa2f7;text-decoration:underline">设置</a> 配置 API 密钥。
+    </div>`;
+  }
+  
+  container.innerHTML = `<div class="welcome-wrapper">
+    <div class="welcome-classical">${t('welcomeZh')}</div>
+    ${currentLang === 'zh' && T.zh.welcomeEn ? '<div class="welcome-en">' + T.zh.welcomeEn + '</div>' : ''}
+    <div class="welcome-hint">${t('welcomeHint')}</div>
+    ${warningHtml}
+  </div>`;
+}
+
+function startRename(sid) {
+  const item = document.querySelector(`.session-item[data-sid="${sid}"]`);
+  if (!item) return;
+  const s = sessions.find(x => x.id === sid);
+  if (!s) return;
+  const nameSpan = item.querySelector('.s-name');
+  const input = document.createElement('input');
+  input.className = 's-rename-input';
+  input.value = s.name;
+  input.onblur = () => finishRename(sid, input.value);
+  input.onkeydown = e => { if (e.key==='Enter') finishRename(sid, input.value); if (e.key==='Escape') loadSessions(); };
+  nameSpan.replaceWith(input);
+  input.focus(); input.select();
+}
+
+async function finishRename(sid, name) {
+  name = name.trim();
+  if (!name) { await loadSessions(); return; }
+  try { await fetch(`/api/sessions/${sid}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name}) }); } catch(e) {}
+  await loadSessions();
+  if (sid === currentSessionId) {
+    const s = sessions.find(x => x.id === sid);
+    if (s) currentSessionName = s.name;
+  }
+}
+
+function confirmDelete(sid) {
+  if (sessions.length <= 1) { toast(t('minOneSession'), 'err'); return; }
+  const s = sessions.find(x => x.id === sid);
+  document.getElementById('confirmMsg').textContent = t('deleteConfirm') + (s ? s.name : '') + t('deleteConfirmEnd');
+  confirmCb = () => deleteSession(sid);
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+
+function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); confirmCb = null; }
+
+async function deleteSession(sid) {
+  try { await fetch(`/api/sessions/${sid}`, { method:'DELETE' }); } catch(e) {}
+  closeConfirm();
+  await loadSessions();
+  if (currentSessionId === sid) {
+    if (sessions.length > 0) switchSession(sessions[0].id);
+    else currentSessionId = '';
+  }
+}
+
+document.getElementById('confirmYes').addEventListener('click', () => { if (confirmCb) confirmCb(); });
+
+// ═══════════════════════════════════════
+// Chat + SSE Streaming
+// ═══════════════════════════════════════
+const cInput = document.getElementById('input');
+const cSendBtn = document.getElementById('sendBtn');
+const cMessages = document.getElementById('messages');
+const btnStop = document.getElementById('btnStop');
+
+async function checkHealth() {
+  try {
+    const r = await fetch('/api/health'); const d = await r.json();
+    const dot = document.getElementById('statusDot');
+    dot.className = 'dot' + (d.llm_available ? '' : ' warn');
+    apiReady = d.llm_available || false;
+    const ver = document.getElementById('versionTag');
+    if (d.version) ver.textContent = 'v' + d.version;
+    const bar = document.getElementById('healthBar');
+    if (!d.llm_available) { bar.textContent = t('apiNotReady'); bar.style.display = 'block'; }
+    else { bar.style.display = 'none'; }
+    // Update welcome page API warning dynamically
+    const warnBanner = document.getElementById('apiWarningBanner');
+    if (warnBanner) { warnBanner.style.display = d.llm_available ? 'none' : 'block'; }
+  } catch(e) { document.getElementById('statusDot').className = 'dot err'; apiReady = false; }
+}
+checkHealth(); setInterval(checkHealth, 30000);
+
+cInput.addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+cInput.addEventListener('input', () => { cInput.style.height = 'auto'; cInput.style.height = Math.min(cInput.scrollHeight, 150) + 'px'; });
+
+function appendMsg(text, role, createdAt) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  if (role === 'shiyi') {
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'md-content';
+    contentDiv.innerHTML = md(text);
+    div.appendChild(contentDiv);
+  } else {
+    div.textContent = text;
+  }
+  const timeStr = createdAt ? formatTime(createdAt) : formatTime(new Date().toISOString());
+  if (timeStr) {
+    const timeEl = document.createElement('span');
+    timeEl.className = 'msg-time'; timeEl.textContent = timeStr;
+    div.appendChild(timeEl);
+  }
+  if (role === 'shiyi') {
+    const actions = document.createElement('div');
+    actions.className = 'msg-actions';
+    const cpBtn = document.createElement('button');
+    cpBtn.textContent = t('copy');
+    cpBtn.onclick = () => {
+      navigator.clipboard.writeText(text).then(() => {
+        cpBtn.textContent = t('copied'); cpBtn.classList.add('copied');
+        setTimeout(() => { cpBtn.textContent = t('copy'); cpBtn.classList.remove('copied'); }, 2000);
+      }).catch(() => toast(t('copyFail'), 'err'));
+    };
+    actions.appendChild(cpBtn);
+    div.appendChild(actions);
+  }
+  cMessages.appendChild(div);
+  return div;
+}
+
+function scrollBottom() { cMessages.scrollTop = cMessages.scrollHeight; }
+
+async function send() {
+  const text = cInput.value.trim();
+  if (!text || sending) return;
+  // Check API availability
+  if (!apiReady) {
+    appendMsg(text, 'user', new Date().toISOString());
+    appendMsg('⚠️ API 未配置或不可用，无法对话。请前往 设置 配置 API 密钥后重试。', 'shiyi', new Date().toISOString());
+    scrollBottom();
+    return;
+  }
+  cInput.value = ''; cInput.style.height = 'auto';
+  sending = true; cSendBtn.disabled = true;
+  btnStop.classList.add('show');
+
+  // Show user message
+  appendMsg(text, 'user', new Date().toISOString());
+  scrollBottom();
+
+  // Create reply placeholder
+  const replyEl = document.createElement('div');
+  replyEl.className = 'msg shiyi';
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'md-content';
+  contentDiv.textContent = '⏳ 思考中…';
+  replyEl.appendChild(contentDiv);
+  cMessages.appendChild(replyEl);
+  scrollBottom();
+
+  let fullReply = '';
+
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: text, session_id: currentSessionId}),
+    });
+
+    if (!r.ok) {
+      const err = await r.json();
+      fullReply = '错误: ' + (err.detail || r.statusText);
+    } else {
+      const d = await r.json();
+      fullReply = d.reply || '（无回复）';
+    }
+  } catch(e) {
+    fullReply = t('connLost') + ': ' + e.message;
+    toast(t('connLost'), 'err');
+  } finally {
+    // Finalize
+    contentDiv.innerHTML = md(fullReply);
+
+    // Add time + copy
+    const timeEl = document.createElement('span');
+    timeEl.className = 'msg-time'; timeEl.textContent = formatTime(new Date().toISOString());
+    replyEl.appendChild(timeEl);
+    const actions = document.createElement('div');
+    actions.className = 'msg-actions';
+    const cpBtn = document.createElement('button');
+    cpBtn.textContent = t('copy');
+    cpBtn.onclick = () => {
+      navigator.clipboard.writeText(fullReply).then(() => {
+        cpBtn.textContent = t('copied'); cpBtn.classList.add('copied');
+        setTimeout(() => { cpBtn.textContent = t('copy'); cpBtn.classList.remove('copied'); }, 2000);
+      }).catch(() => toast(t('copyFail'), 'err'));
+    };
+    actions.appendChild(cpBtn);
+    replyEl.appendChild(actions);
+
+    sending = false; cSendBtn.disabled = false;
+    btnStop.classList.remove('show');
+    cInput.focus();
+    scrollBottom();
+    loadSessions();
+  }
+}
+
+function stopStream() {
+  if (streamAbort) { streamAbort.abort(); streamAbort = null; }
+}
+
+// ═══════════════════════════════════════
+// File Upload
+// ═══════════════════════════════════════
+async function uploadFile() {
+  const input = document.getElementById('fileInput');
+  const file = input.files[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const r = await fetch('/api/upload', { method:'POST', body:formData });
+    const d = await r.json();
+    if (r.ok) { cInput.value = (cInput.value ? cInput.value + ' ' : '') + '[已上传: ' + d.filename + ']'; cInput.focus(); }
+    else { toast(d.detail || t('uploadFail'), 'err'); }
+  } catch(e) { toast(t('uploadFail')+': '+e.message, 'err'); }
+  input.value = '';
+}
+
+// ═══════════════════════════════════════
+// Memory Panel
+// ═══════════════════════════════════════
+async function loadMemory() {
+  const container = document.getElementById('memoryContent');
+  container.innerHTML = '<div style="text-align:center;color:#555;padding:60px"><span class="loading-spinner"></span> 加载中…</div>';
+  try {
+    const r = await fetch('/api/memories'); const d = await r.json();
+    const stats = d.stats || {};
+    let html = `<div class="mem-stats">
+      <div class="mem-stat"><div class="ms-val">${stats.total_fragments || 0}</div><div class="ms-label">${t('memCrystal')}</div></div>
+      <div class="mem-stat"><div class="ms-val">${stats.hot_count || 0}</div><div class="ms-label">${t('memHot')}</div></div>
+      <div class="mem-stat"><div class="ms-val">${stats.cold_count || 0}</div><div class="ms-label">${t('memCold')}</div></div>
+    </div>`;
+    // Search box
+    html += `<div style="margin-top:16px;display:flex;gap:8px">
+      <input type="text" id="memSearchInput" placeholder="搜索记忆…" style="flex:1;padding:10px 14px;background:#1c1c1c;border:1px solid #1f1f1f;border-radius:8px;color:#d4d4d4;font-size:13px;outline:none" onkeydown="if(event.key==='Enter')searchMemory()">
+      <button onclick="searchMemory()" style="padding:10px 16px;background:#2563eb;border:none;color:#fff;border-radius:8px;font-size:13px;cursor:pointer">搜索</button>
+    </div>`;
+    html += '<div id="memResults" style="margin-top:14px">';
+    const items = d.recent || [];
+    if (items.length > 0) {
+      html += items.map(f => `<div class="mem-item" style="cursor:pointer" onclick="askMemory('${escHtml(f.content||'').replace(/'/g,"\\'").substring(0,80)}')">
+        <div class="mem-content">${escHtml(f.content || '')}</div>
+        <div class="mem-meta"><span>${escHtml(f.domain||'')}</span><span>${f.created_at||''}</span></div>
+      </div>`).join('');
+    } else {
+      html += `<div class="empty-state"><div class="empty-icon">💾</div><p>${t('noMemories')}</p></div>`;
+    }
+    html += '</div>';
+    container.innerHTML = html;
+  } catch(e) { container.innerHTML = '<div style="color:#e44;padding:20px">加载失败: '+e.message+'</div>'; }
+}
+
+async function searchMemory() {
+  const q = document.getElementById('memSearchInput')?.value?.trim();
+  if (!q) return;
+  const resultsEl = document.getElementById('memResults');
+  if (!resultsEl) return;
+  resultsEl.innerHTML = '<div style="text-align:center;color:#555;padding:20px">搜索中…</div>';
+  try {
+    const r = await fetch('/api/memories?query=' + encodeURIComponent(q));
+    const d = await r.json();
+    const items = d.results || d.recent || [];
+    if (items.length > 0) {
+      resultsEl.innerHTML = items.map(f => `<div class="mem-item" style="cursor:pointer" onclick="askMemory('${escHtml(f.content||'').replace(/'/g,"\\'").substring(0,80)}')">
+        <div class="mem-content">${escHtml(f.content || '')}</div>
+        <div class="mem-meta"><span>${escHtml(f.domain||'')}</span><span>${f.created_at||''}</span></div>
+      </div>`).join('');
+    } else {
+      resultsEl.innerHTML = '<div style="color:#555;padding:20px;text-align:center">未找到相关记忆</div>';
+    }
+  } catch(e) { resultsEl.innerHTML = '<div style="color:#e44;padding:10px">搜索失败: '+e.message+'</div>'; }
+}
+
+function askMemory(text) {
+  switchPanel('chat');
+  const ta = document.querySelector('.input-area textarea');
+  if (ta) { ta.value = '关于"' + text + '"，你还记得什么？'; ta.focus(); }
+}
+
+// ═══════════════════════════════════════
+// Clerks Panel
+// ═══════════════════════════════════════
+let clerks = [];
+let selectedClerkId = '';
+
+async function loadClerks() {
+  const container = document.getElementById('clerkContent');
+  container.innerHTML = '<div style="text-align:center;color:#555;padding:60px"><span class="loading-spinner"></span> 加载中…</div>';
+  try {
+    const r = await fetch('/api/clerks'); const d = await r.json();
+    clerks = d.clerks || [];
+    renderClerks();
+  } catch(e) { container.innerHTML = '<div style="color:#e44;padding:20px">加载失败: '+e.message+'</div>'; }
+}
+
+function renderClerks() {
+  const container = document.getElementById('clerkContent');
+  if (clerks.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">👤</div><p>${t('noClerks')}</p></div>`;
+    return;
+  }
+  let html = '<div class="clerk-list">';
+  for (const c of clerks) {
+    const enabled = c.enabled !== false;
+    const iconCls = enabled ? 'on' : 'off';
+    const statusLabel = enabled ? t('enabled') : t('disabled');
+    const statusCls = enabled ? 'enabled' : 'disabled';
+    html += `<div class="clerk-card${c.clerk_id === selectedClerkId ? ' active' : ''}" onclick="selectClerk('${escHtml(c.clerk_id)}')">
+      <div class="clerk-card-header">
+        <div class="clerk-icon ${c.health === 'running' ? 'on' : (c.health === 'offline' ? 'err' : iconCls)}" title="${c.health || 'unknown'}"></div>
+        <div class="clerk-name">${escHtml(c.name || c.clerk_id)}</div>
+        <span class="clerk-status ${statusCls}">${statusLabel}${c.health === 'running' ? ' 🟢' : (c.health === 'offline' ? ' 🔴离线' : '')}</span>
+      </div>
+      ${c.description ? '<div class="clerk-desc">' + escHtml(c.description) + '</div>' : ''}
+    </div>`;
+    // Detail for selected clerk
+    if (c.clerk_id === selectedClerkId) {
+      html += `<div class="clerk-detail open"><h3>${escHtml(c.name || c.clerk_id)}</h3>`;
+      const source = c._source === 'builtin' ? t('builtin') : t('userInstalled');
+      html += `<div class="clerk-meta"><span>${t('version')} ${escHtml(c.version||'?')}</span><span>${source}</span></div>`;
+      const skills = c.skills || c.capabilities || [];
+      const allSkills = [...new Set([...skills, ...(c._skill_files || [])])];
+      if (allSkills.length > 0) {
+        html += '<div class="skill-tags">' + allSkills.map(s => `<span class="skill-tag">${escHtml(s)}</span>`).join('') + '</div>';
+      }
+      const kbFiles = c._kb_files || [];
+      if (kbFiles.length > 0) {
+        html += '<ul class="kb-list">' + kbFiles.map(f => `<li>${escHtml(f)}</li>`).join('') + '</ul>';
+      }
+      const declaredKeys = (c.api_keys || []).map(entry => typeof entry === 'object' ? entry.name : entry);
+      const keyStatus = c._key_status || {};
+      if (declaredKeys.length > 0) {
+        html += '<div style="margin-bottom:10px;font-size:12px;color:#666">🔑 API 密钥</div>';
+        for (const k of declaredKeys) {
+          const configured = keyStatus[k];
+          html += `<div class="clerk-key-row"><label>${escHtml(k)}</label><input type="password" id="ck-${escHtml(k)}" placeholder="${configured ? t('keyConfigured') : 'sk-...'}" autocomplete="off">${configured ? '<span class="key-ok">✓</span>' : ''}</div>`;
+        }
+      }
+      html += `<div class="clerk-actions">
+        <button class="btn-toggle ${enabled ? 'danger' : ''}" onclick="toggleClerk('${escHtml(c.clerk_id)}')">${enabled ? t('disable') : t('enable')}</button>
+        ${declaredKeys.length > 0 ? `<button class="btn-primary" onclick="saveClerkKeys('${escHtml(c.clerk_id)}')">${t('saveKey')}</button>` : ''}
+        <button class="btn-outline" onclick="showConfigureClerk('${escHtml(c.clerk_id)}')" style="padding:8px 14px;border-radius:8px;border:1px solid #333;background:transparent;color:#aaa;cursor:pointer;font-size:12px">配置</button>
+        <button class="btn-outline" onclick="restartClerk('${escHtml(c.clerk_id)}')" style="padding:8px 14px;border-radius:8px;border:1px solid #333;background:transparent;color:#aaa;cursor:pointer;font-size:12px">重启</button>
+        <button class="btn-outline" onclick="showRenameClerk('${escHtml(c.clerk_id)}')" style="padding:8px 14px;border-radius:8px;border:1px solid #333;background:transparent;color:#aaa;cursor:pointer;font-size:12px">更名</button>
+        <button class="btn-outline" onclick="showAssignSkills('${escHtml(c.clerk_id)}')" style="padding:8px 14px;border-radius:8px;border:1px solid #333;background:transparent;color:#aaa;cursor:pointer;font-size:12px">分配技能</button>
+        ${c._source !== 'builtin' ? `<button class="btn-outline" onclick="deleteClerkConfirm('${escHtml(c.clerk_id)}', '${escHtml(c.name || c.clerk_id)}')" style="padding:8px 14px;border-radius:8px;border:1px solid #4a2020;background:transparent;color:#e66;cursor:pointer;font-size:12px">删除</button>` : ''}
+      </div>`;
+      html += `<div class="settings-status" id="clerkStatus"></div></div>`;
+    }
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+async function selectClerk(id) {
+  selectedClerkId = selectedClerkId === id ? '' : id;
+  // Load detail if newly selected
+  if (selectedClerkId) {
+    try {
+      const r = await fetch('/api/clerks/' + id);
+      if (r.ok) {
+        const detail = await r.json();
+        // Merge into clerks array
+        const idx = clerks.findIndex(c => c.clerk_id === id);
+        if (idx >= 0) { clerks[idx] = {...clerks[idx], ...detail}; }
+      }
+    } catch(e) {}
+  }
+  renderClerks();
+}
+
+async function restartClerk(clerkId) {
+  try {
+    const r = await fetch('/api/clerks/' + clerkId + '/restart', { method:'POST' });
+    const d = await r.json();
+    if (r.ok) { toast(d.message || '吏员已重启', 'ok'); loadClerks(); }
+    else { toast(d.detail || '重启失败', 'err'); }
+  } catch(e) { toast('重启失败: ' + e.message, 'err'); }
+}
+
+async function toggleClerk(clerkId) {
+  const c = clerks.find(x => x.clerk_id === clerkId);
+  if (!c) return;
+  const enabled = c.enabled !== false;
+  const action = enabled ? 'disable' : 'enable';
+  try {
+    const r = await fetch('/api/clerks/' + clerkId + '/' + action, { method:'POST' });
+    const d = await r.json();
+    if (r.ok) { c.enabled = !enabled; toast(d.message, 'ok'); renderClerks(); }
+    else { toast(d.detail || t('opFail'), 'err'); }
+  } catch(e) { toast(t('opFail'), 'err'); }
+}
+
+async function saveClerkKeys(clerkId) {
+  const c = clerks.find(x => x.clerk_id === clerkId);
+  if (!c) return;
+  const apiKeys = {};
+  for (const entry of (c.api_keys || [])) {
+    const keyName = typeof entry === 'object' ? entry.name : entry;
+    const input = document.getElementById('ck-' + keyName);
+    if (input && input.value.trim()) apiKeys[keyName] = input.value.trim();
+  }
+  if (Object.keys(apiKeys).length === 0) { toast(t('noKeys'), 'err'); return; }
+  try {
+    const r = await fetch('/api/clerks/' + clerkId + '/config', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({api_keys: apiKeys}) });
+    const d = await r.json();
+    if (r.ok) { toast(d.message, 'ok'); loadClerks(); }
+    else { toast(d.detail || t('opFail'), 'err'); }
+  } catch(e) { toast(t('opFail'), 'err'); }
+}
+
+// ═══════════════════════════════════════
+// 吏员创建/更名/删除/技能分配
+// ═══════════════════════════════════════
+
+function showCreateClerkModal() {
+  document.getElementById('ccName').value = '';
+  document.getElementById('ccDesc').value = '';
+  document.getElementById('ccTools').value = '';
+  document.getElementById('ccNeedsLLM').checked = false;
+  document.getElementById('ccModelRow').style.display = 'none';
+  document.getElementById('ccModelName').value = '';
+  document.getElementById('ccProviderRow').style.display = 'none';
+  document.getElementById('ccProvider').value = '';
+  document.getElementById('ccBaseUrlRow').style.display = 'none';
+  document.getElementById('ccBaseUrl').value = '';
+  document.getElementById('ccNeedsAPI').checked = false;
+  document.getElementById('ccAPIKeysRow').style.display = 'none';
+  document.getElementById('ccAPIKeyNames').value = '';
+  document.getElementById('createClerkModal').style.display = 'flex';
+}
+
+function hideCreateClerkModal() {
+  document.getElementById('createClerkModal').style.display = 'none';
+}
+
+async function submitCreateClerk() {
+  const name = document.getElementById('ccName').value.trim();
+  if (!name) { toast('请输入吏员名称', 'err'); return; }
+  const desc = document.getElementById('ccDesc').value.trim();
+  const toolsText = document.getElementById('ccTools').value.trim();
+  const requiresLLM = document.getElementById('ccNeedsLLM').checked;
+  const modelName = document.getElementById('ccModelName').value.trim();
+  const provider = document.getElementById('ccProvider').value.trim();
+  const baseUrl = document.getElementById('ccBaseUrl').value.trim();
+  const needsAPI = document.getElementById('ccNeedsAPI').checked;
+  const apiKeyNames = document.getElementById('ccAPIKeyNames').value.trim();
+
+  // Parse tools
+  let tools = [];
+  if (toolsText) {
+    for (const line of toolsText.split('\n')) {
+      const t = line.trim();
+      if (t) {
+        tools.push({
+          name: t,
+          description: `执行${t}操作`,
+          inputSchema: {
+            type: "object",
+            properties: { action: { type: "string", description: "操作描述" } },
+            required: ["action"]
+          }
+        });
+      }
+    }
+  }
+
+  let api_keys = [];
+  if (needsAPI && apiKeyNames) {
+    api_keys = apiKeyNames.split(',').map(k => k.trim()).filter(k => k);
+  }
+
+  try {
+    const r = await fetch('/api/clerks/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, description: desc, tools, requires_llm: requiresLLM, model_name: modelName, provider, base_url: baseUrl, api_keys })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast(d.message || '吏员已创建', 'ok');
+      hideCreateClerkModal();
+      loadClerks();
+    } else {
+      toast(d.detail || '创建失败', 'err');
+    }
+  } catch(e) { toast('创建失败: ' + e.message, 'err'); }
+}
+
+let _renameClerkId = '';
+function showRenameClerk(clerkId) {
+  _renameClerkId = clerkId;
+  const c = clerks.find(x => x.clerk_id === clerkId);
+  document.getElementById('rcNewName').value = c ? (c.name || '') : '';
+  document.getElementById('renameClerkModal').style.display = 'flex';
+}
+
+async function submitRenameClerk() {
+  const newName = document.getElementById('rcNewName').value.trim();
+  if (!newName) { toast('名称不能为空', 'err'); return; }
+  try {
+    const r = await fetch('/api/clerks/' + _renameClerkId + '/rename', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newName })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast(d.message, 'ok');
+      document.getElementById('renameClerkModal').style.display = 'none';
+      loadClerks();
+    } else { toast(d.detail || '更名失败', 'err'); }
+  } catch(e) { toast('更名失败', 'err'); }
+}
+
+function deleteClerkConfirm(clerkId, clerkName) {
+  if (!confirm(`确定要删除吏员「${clerkName}」吗？此操作不可恢复。`)) return;
+  doDeleteClerk(clerkId);
+}
+
+async function doDeleteClerk(clerkId) {
+  try {
+    const r = await fetch('/api/clerks/' + clerkId, { method: 'DELETE' });
+    const d = await r.json();
+    if (r.ok) {
+      toast(d.message, 'ok');
+      if (selectedClerkId === clerkId) selectedClerkId = '';
+      loadClerks();
+    } else { toast(d.detail || '删除失败', 'err'); }
+  } catch(e) { toast('删除失败', 'err'); }
+}
+
+let _assignClerkId = '';
+async function showAssignSkills(clerkId) {
+  _assignClerkId = clerkId;
+  const c = clerks.find(x => x.clerk_id === clerkId);
+  const currentSkills = (c && c.skills) || [];
+  
+  // Load available skills
+  let allSkills = [];
+  try {
+    const r = await fetch('/api/skills');
+    const d = await r.json();
+    allSkills = d.skills || [];
+  } catch(e) {}
+  
+  let html = '';
+  if (allSkills.length === 0) {
+    html = '<div style="color:#555;text-align:center;padding:20px">暂无已安装的技能。<br>使用 <code style="color:#7aa2f7">shiyi skill install</code> 安装技能后再分配。</div>';
+  } else {
+    for (const s of allSkills) {
+      const checked = currentSkills.includes(s.id) ? 'checked' : '';
+      html += `<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a1a;cursor:pointer">
+        <input type="checkbox" value="${escHtml(s.id)}" ${checked} style="accent-color:#7aa2f7">
+        <div>
+          <div style="font-size:13px;color:#ccc">${escHtml(s.name || s.id)}</div>
+          ${s.description ? `<div style="font-size:11px;color:#666;margin-top:2px">${escHtml(s.description)}</div>` : ''}
+        </div>
+      </label>`;
+    }
+  }
+  document.getElementById('assignSkillsBody').innerHTML = html;
+  document.getElementById('assignSkillsModal').style.display = 'flex';
+}
+
+async function submitAssignSkills() {
+  const checkboxes = document.querySelectorAll('#assignSkillsBody input[type=checkbox]');
+  const selected = [];
+  checkboxes.forEach(cb => { if (cb.checked) selected.push(cb.value); });
+  
+  try {
+    const r = await fetch('/api/clerks/' + _assignClerkId + '/skills', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skills: selected })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast(d.message, 'ok');
+      document.getElementById('assignSkillsModal').style.display = 'none';
+      loadClerks();
+    } else { toast(d.detail || '分配失败', 'err'); }
+  } catch(e) { toast('分配失败', 'err'); }
+}
+
+// ── 保存吏员 API Key ────────────────────────────
+
+async function saveClerkKeys(clerkId) {
+  const c = clerks.find(x => x.clerk_id === clerkId);
+  if (!c) return;
+  const declaredKeys = (c.api_keys || []).map(entry => typeof entry === 'object' ? entry.name : entry);
+  const api_keys = {};
+  let anySet = false;
+  for (const k of declaredKeys) {
+    const el = document.getElementById('ck-' + escHtml(k));
+    const val = el ? el.value.trim() : '';
+    if (val) { api_keys[k] = val; anySet = true; }
+  }
+  if (!anySet) { toast('请至少填写一个 Key', 'err'); return; }
+  try {
+    const r = await fetch('/api/clerks/' + clerkId + '/config', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({api_keys})
+    });
+    const d = await r.json();
+    if (r.ok) { toast(d.message || 'Key 已保存', 'ok'); loadClerks(); }
+    else { toast(d.detail || '保存失败', 'err'); }
+  } catch(e) { toast('保存失败: ' + e.message, 'err'); }
+}
+
+let _configureClerkId = '';
+async function showConfigureClerk(clerkId) {
+  _configureClerkId = clerkId;
+  const c = clerks.find(x => x.clerk_id === clerkId);
+  if (!c) return;
+  document.getElementById('cfgDesc').value = c.description || '';
+  document.getElementById('cfgModelName').value = c.model_name || (c._raw_config && c._raw_config.model_name) || '';
+  document.getElementById('cfgBaseUrl').value = c.base_url || (c._raw_config && c._raw_config.base_url) || '';
+  const caps = c.capabilities || [];
+  document.getElementById('cfgTools').value = caps.join('\n');
+  document.getElementById('cfgNeedsLLM').checked = c.requires_llm || false;
+  // 加载技能分配列表
+  const skillsContainer = document.getElementById('cfgSkillsContainer');
+  const currentSkills = c.skills || [];
+  try {
+    const sr = await fetch('/api/skills');
+    const sd = await sr.json();
+    const allSkills = sd.skills || [];
+    if (allSkills.length === 0) {
+      skillsContainer.innerHTML = '<div style="color:#555;font-size:12px">暂无已安装的技能</div>';
+    } else {
+      let shtml = '';
+      for (const s of allSkills) {
+        const checked = currentSkills.includes(s.id) ? 'checked' : '';
+        shtml += '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;font-size:12px;color:#aaa"><input type="checkbox" class="cfg-skill-cb" value="' + s.id + '" ' + checked + ' style="accent-color:#7aa2f7"><span>' + (s.name || s.id) + '</span></label>';
+      }
+      skillsContainer.innerHTML = shtml;
+    }
+  } catch(e) {
+    skillsContainer.innerHTML = '<div style="color:#555;font-size:12px">加载技能列表失败</div>';
+  }
+  // Populate API key fields
+  const declaredKeys = (c.api_keys || []).map(entry => typeof entry === 'object' ? entry.name : entry);
+  const keyContainer = document.getElementById('cfgAPIKeysContainer');
+  let keyHtml = '';
+  if (declaredKeys.length > 0) {
+    keyHtml = '<div style="font-size:12px;color:#888;margin-bottom:6px">API Key 名称（逗号分隔）</div>';
+    keyHtml += '<input id="cfgAPIKeyNames" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:14px" value="' + declaredKeys.join(', ') + '">';
+  }
+  keyContainer.innerHTML = keyHtml;
+  document.getElementById('configureClerkModal').style.display = 'flex';
+}
+
+async function submitConfigureClerk() {
+  const desc = document.getElementById('cfgDesc').value.trim();
+  const modelName = document.getElementById('cfgModelName').value.trim();
+  const baseUrl = document.getElementById('cfgBaseUrl').value.trim();
+  const toolsText = document.getElementById('cfgTools').value.trim();
+  const requiresLLM = document.getElementById('cfgNeedsLLM').checked;
+  const apiKeyNamesEl = document.getElementById('cfgAPIKeyNames');
+  const apiKeyNamesText = apiKeyNamesEl ? apiKeyNamesEl.value.trim() : '';
+  
+  let tools = [];
+  if (toolsText) {
+    for (const line of toolsText.split('\n')) {
+      const t = line.trim();
+      if (t) {
+        tools.push({
+          name: t,
+          description: `执行${t}操作`,
+          inputSchema: {
+            type: "object",
+            properties: { action: { type: "string", description: "操作描述" } },
+            required: ["action"]
+          }
+        });
+      }
+    }
+  }
+  
+  let api_keys = [];
+  if (apiKeyNamesText) {
+    api_keys = apiKeyNamesText.split(',').map(k => k.trim()).filter(k => k);
+    api_keys = api_keys.map(name => ({ name, env: name }));
+  }
+  
+  try {
+    const skillCheckboxes = document.querySelectorAll('.cfg-skill-cb');
+    const selectedSkills = [];
+    skillCheckboxes.forEach(cb => { if (cb.checked) selectedSkills.push(cb.value); });
+    const r = await fetch('/api/clerks/' + _configureClerkId + '/configure', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: desc, model_name: modelName, base_url: baseUrl, tools, api_keys, requires_llm: requiresLLM, skills: selectedSkills })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast(d.message || '配置已更新', 'ok');
+      document.getElementById('configureClerkModal').style.display = 'none';
+      _configureClerkId = '';
+      loadClerks();
+    } else {
+      toast(d.detail || '配置失败', 'err');
+    }
+  } catch(e) { toast('配置失败: ' + e.message, 'err'); }
+}
+
+// ═══════════════════════════════════════
+// Skills Panel
+// ═══════════════════════════════════════
+let skills = [];
+let selectedSkillId = '';
+
+async function loadSkills() {
+  const container = document.getElementById('skillsContent');
+  container.innerHTML = '<div style="text-align:center;color:#555;padding:60px"><span class="loading-spinner"></span> 加载中…</div>';
+  try {
+    const r = await fetch('/api/skills'); const d = await r.json();
+    skills = d.skills || [];
+    renderSkills();
+  } catch(e) { container.innerHTML = '<div style="color:#e44;padding:20px">加载失败: '+e.message+'</div>'; }
+}
+
+function renderSkills() {
+  const container = document.getElementById('skillsContent');
+  if (skills.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📜</div><p>${t('noSkills')}</p></div>`;
+    return;
+  }
+  let html = '<div class="skill-list">';
+  for (const s of skills) {
+    html += `<div class="skill-card${s.id === selectedSkillId ? ' active' : ''}" onclick="selectSkill('${escHtml(s.id)}')">
+      <div class="skill-card-header">
+        <div class="skill-name">${escHtml(s.name || s.id)}</div>
+        ${s.category ? `<span class="skill-version">${escHtml(s.category)}</span>` : ''}
+      </div>
+      ${s.description ? `<div class="skill-desc">${escHtml(s.description)}</div>` : ''}
+    </div>`;
+    if (s.id === selectedSkillId && s.raw_body) {
+      html += `<div class="skill-detail open">
+        <pre>${escHtml(s.raw_body.slice(0, 2000))}${s.raw_body.length > 2000 ? '\n\n...(内容已截断)' : ''}</pre>
+      </div>`;
+    }
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function selectSkill(id) {
+  selectedSkillId = selectedSkillId === id ? '' : id;
+  renderSkills();
+}
+
+// ═══════════════════════════════════════
+// Files Panel
+// ═══════════════════════════════════════
+async function loadFiles() {
+  const container = document.getElementById('filesContent');
+  container.innerHTML = '<div style="text-align:center;color:#555;padding:60px"><span class="loading-spinner"></span> 加载中…</div>';
+  try {
+    const r = await fetch('/api/files'); const d = await r.json();
+    const files = d.files || [];
+    if (files.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">📂</div><p>${t('noFiles')}</p></div>`;
+      return;
+    }
+    container.innerHTML = files.map(f => {
+      const mtime = f.modified ? f.modified.slice(0,16).replace('T',' ') : '';
+      return `<div class="file-item">
+        <div class="file-info">
+          <div class="file-name">📄 ${escHtml(f.name)}</div>
+          <div class="file-meta">${formatSize(f.size)} · ${mtime}</div>
+        </div>
+        <div class="file-actions">
+          <button onclick="downloadFile('${escHtml(f.name)}')">下载</button>
+          <button class="del" onclick="confirmDeleteFile('${escHtml(f.name)}')">删除</button>
+        </div>
+      </div>`;
+    }).join('') + `<div style="color:#555;font-size:12px;margin-top:16px">${files.length} 个文件 · ~/.shiyi/workspace/</div>`;
+  } catch(e) { container.innerHTML = '<div style="color:#e44;padding:20px">加载失败</div>'; }
+}
+
+function downloadFile(name) { window.open('/api/files/download?name=' + encodeURIComponent(name), '_blank'); }
+
+function confirmDeleteFile(name) {
+  document.getElementById('confirmMsg').textContent = t('deleteFileConfirm') + name + t('deleteFileConfirmEnd');
+  confirmCb = () => doDeleteFile(name);
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+
+async function doDeleteFile(name) {
+  closeConfirm();
+  try {
+    const r = await fetch('/api/files?name=' + encodeURIComponent(name), { method:'DELETE' });
+    if (r.ok) { toast('已删除', 'ok'); loadFiles(); }
+    else { const d = await r.json(); toast(d.detail || '删除失败', 'err'); }
+  } catch(e) { toast('删除失败', 'err'); }
+}
+
+// ═══════════════════════════════════════
+// Export Dialog
+// ═══════════════════════════════════════
+function openExport() {
+  const sel = document.getElementById('exportSession');
+  sel.innerHTML = sessions.map(s => `<option value="${s.id}" ${s.id===currentSessionId?'selected':''}>${escHtml(s.name)}</option>`).join('');
+  document.getElementById('exportAll').checked = false;
+  document.getElementById('exportDateFrom').value = '';
+  document.getElementById('exportDateTo').value = '';
+  document.getElementById('exportOverlay').classList.add('open');
+}
+function closeExport() { document.getElementById('exportOverlay').classList.remove('open'); }
+function onExportAllToggle() { document.getElementById('exportSession').disabled = document.getElementById('exportAll').checked; }
+
+async function doExport() {
+  const all = document.getElementById('exportAll').checked;
+  const fromDate = document.getElementById('exportDateFrom').value;
+  const toDate = document.getElementById('exportDateTo').value;
+  try {
+    let txt = '';
+    const sessionIds = all ? sessions.map(s => s.id) : [document.getElementById('exportSession').value];
+    for (const sid of sessionIds) {
+      const s = sessions.find(x => x.id === sid);
+      if (!s) continue;
+      const r = await fetch(`/api/sessions/${sid}/messages?limit=9999`);
+      const d = await r.json();
+      let msgs = d.messages || [];
+      if (fromDate || toDate) {
+        msgs = msgs.filter(m => {
+          const mt = m.created_at;
+          if (fromDate && mt < fromDate) return false;
+          if (toDate && mt > toDate + 'T23:59:59') return false;
+          return true;
+        });
+      }
+      if (msgs.length === 0) continue;
+      txt += '='.repeat(50) + '\n史佚 — ' + s.name + '\n导出时间: ' + new Date().toLocaleString() + '\n' + '='.repeat(50) + '\n\n';
+      msgs.forEach(m => {
+        const role = m.role === 'user' ? '你' : '史佚';
+        txt += `[${formatTime(m.created_at)}] ${role}:\n${m.content}\n\n`;
+      });
+      txt += '\n';
+    }
+    if (!txt.trim()) { toast('无匹配消息', 'err'); return; }
+    const fname = all ? `史佚_全部对话_${new Date().toISOString().slice(0,10)}.txt` : `史佚_${currentSessionName}_${new Date().toISOString().slice(0,10)}.txt`;
+    const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = fname; a.click();
+    URL.revokeObjectURL(url);
+    toast(t('saved'), 'ok'); closeExport();
+  } catch(e) { toast(t('exportFail'), 'err'); }
+}
+
+// ═══════════════════════════════════════
+// Settings Panel
+// ═══════════════════════════════════════
+const PROVIDERS = {
+  'DeepSeek':   { base_url:'https://api.deepseek.com/v1',   models:['deepseek-v4-pro','deepseek-v4-flash','deepseek-chat'], fast:'deepseek-v4-flash' },
+  'Kimi':       { base_url:'https://api.moonshot.cn/v1',     models:['kimi-k2.6','moonshot-v1-8k','moonshot-v1-32k','moonshot-v1-128k'], fast:'moonshot-v1-8k' },
+  '火山引擎':   { base_url:'https://ark.cn-beijing.volces.com/api/v3', models:['doubao-pro-32k','doubao-lite-32k'], fast:'doubao-lite-32k' },
+  '硅基流动':   { base_url:'https://api.siliconflow.cn/v1',  models:['deepseek-ai/DeepSeek-V3','Qwen/Qwen3-235B-A22B'], emb_models:['BAAI/bge-m3','BAAI/bge-large-zh-v1.5'], fast:'Qwen/Qwen3-235B-A22B' },
+};
+
+let cfgState = {
+  main:  { provider:'DeepSeek', model:'deepseek-v4-pro', custom:false, customUrl:'' },
+  emb:   { provider:'硅基流动', model:'BAAI/bge-m3',      custom:false, customUrl:'' },
+  light: { provider:'follow',   model:'deepseek-v4-flash', custom:false, customUrl:'' },
+  fb:    { provider:'',         model:'',                  custom:false, customUrl:'', enabled:false },
+};
+
+async function loadSettings() {
+  const container = document.getElementById('settingsContent');
+  try {
+    const r = await fetch('/api/config'); const d = await r.json();
+    // Render settings
+    let html = '';
+
+    // API Configuration Section (collapsible)
+    html += `<div class="settings-section"><h3 style="cursor:pointer;display:flex;align-items:center;gap:8px" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.api-arr').textContent=this.nextElementSibling.style.display==='none'?'▶':'▼'">API 配置 <span class="api-arr" style="font-size:10px">▶</span></h3><div style="display:none">`;
+
+    // Main Model
+    html += `<div class="model-card">
+      <div class="model-card-header"><h4>${t('mainModel')}</h4><span class="badge-required">${t('required')}</span><span class="note">${t('mainModelNote')}</span></div>
+      <div class="field-label">${t('provider')}</div>
+      <div class="pvd" id="pvd-main"><button type="button" class="pvd-btn" onclick="togglePvd('main')"><span id="main-pvd-name">DeepSeek</span><span class="arr">▾</span></button><div class="pvd-drop" id="main-drop"></div></div>
+      <div class="detail-info" id="main-detail"><div class="detail-row"><span class="detail-lbl">${t('apiUrl')}</span><span class="detail-val" id="main-url">${PROVIDERS.DeepSeek.base_url}</span></div><div class="detail-row"><span class="detail-lbl">${t('modelType')}</span><span class="detail-val" id="main-models">${t('modelDescLLM')}</span></div></div>
+      <input type="hidden" id="main-custom-url" value=""><input type="hidden" id="main-custom" value="0">
+      <div class="field-label">${t('modelSelect')}</div><select id="main-model"></select>
+      <div class="field-label">${t('apiKey')}</div><input type="password" id="main-key" placeholder="${d.main.key_set ? t('keyConfigured') : 'sk-...'}" autocomplete="off">
+    </div>`;
+
+    // Embedding Model
+    html += `<div class="model-card">
+      <div class="model-card-header"><h4>${t('embModel')}</h4><span class="badge-required">${t('required')}</span><span class="note">${t('embModelNote')}（需支持 Embedding 接口的 API）</span></div>
+      <div class="field-label">${t('provider')}</div>
+      <div class="pvd" id="pvd-emb"><button type="button" class="pvd-btn" onclick="togglePvd('emb')"><span id="emb-pvd-name">硅基流动</span><span class="arr">▾</span></button><div class="pvd-drop" id="emb-drop"></div></div>
+      <div class="detail-info" id="emb-detail"><div class="detail-row"><span class="detail-lbl">${t('apiUrl')}</span><span class="detail-val" id="emb-url">${PROVIDERS['硅基流动'].base_url}</span></div><div class="detail-row"><span class="detail-lbl">${t('modelType')}</span><span class="detail-val" id="emb-models">${t('modelDescEmb')}</span></div></div>
+      <input type="hidden" id="emb-custom-url" value=""><input type="hidden" id="emb-custom" value="0">
+      <div class="field-label">${t('modelSelect')}</div><select id="emb-model"></select>
+      <div class="field-label">${t('apiKey')}</div><input type="password" id="emb-key" placeholder="${d.embedding.key_set ? t('keyConfigured') : 'sk-...'}" autocomplete="off">
+    </div>`;
+
+    // Light Model
+    html += `<div class="model-card">
+      <div class="model-card-header"><h4>${t('lightModel')}</h4><span class="badge-optional">可选</span><span class="note">${t('lightModelNote')}</span></div>
+      <div class="field-label">${t('provider')}</div>
+      <div class="pvd" id="pvd-light"><button type="button" class="pvd-btn" onclick="togglePvd('light')"><span id="light-pvd-name">${t('followMain')} (DeepSeek)</span><span class="arr">▾</span></button><div class="pvd-drop" id="light-drop"></div></div>
+      <div class="detail-info" id="light-detail"><div class="detail-row"><span class="detail-lbl">${t('apiUrl')}</span><span class="detail-val" id="light-url">${t('followMainModels')}</span></div><div class="detail-row"><span class="detail-lbl">${t('modelType')}</span><span class="detail-val" id="light-models">${t('modelDescLight')}</span></div></div>
+      <input type="hidden" id="light-custom-url" value=""><input type="hidden" id="light-custom" value="0">
+      <div class="field-label">${t('modelSelect')}</div><select id="light-model"></select>
+      <div class="field-label">${t('apiKey')} <span style="font-weight:400;color:#555">（${t('lightKeyNote')}）</span></div><input type="password" id="light-key" placeholder="${t('lightKeyPlaceholder')}" autocomplete="off">
+    </div>`;
+
+    // Fallback Model (collapsible)
+    html += `<div class="fb-card" id="fb-card" onclick="toggleFallback(event)">
+      <div class="fb-header"><h4>${t('fallbackModel')}</h4><span class="badge-optional">可选</span><span class="fb-arr" id="fb-arr">▶</span></div>
+      <div class="fb-body" id="fb-body">
+        <div class="field-label">${t('provider')}</div>
+        <div class="pvd" id="pvd-fb"><button type="button" class="pvd-btn" onclick="togglePvd('fb');event.stopPropagation()"><span id="fb-pvd-name">${t('selectProvider')}</span><span class="arr">▾</span></button><div class="pvd-drop" id="fb-drop"></div></div>
+        <div class="detail-info" id="fb-detail"><div class="detail-row"><span class="detail-lbl">${t('apiUrl')}</span><span class="detail-val" id="fb-url">—</span></div><div class="detail-row"><span class="detail-lbl">${t('modelType')}</span><span class="detail-val" id="fb-models">—</span></div></div>
+        <input type="hidden" id="fb-custom-url" value=""><input type="hidden" id="fb-custom" value="0">
+        <div class="field-label">${t('modelSelect')}</div><select id="fb-model"></select>
+        <div class="field-label">${t('apiKey')} <span style="font-weight:400;color:#555">（可选）</span></div><input type="password" id="fb-key" placeholder="留空则使用主模型密钥" autocomplete="off">
+      </div>
+    </div>`;
+
+    // Save button (inside API collapsible)
+    html += `<div class="save-row"><button class="btn-secondary" onclick="switchPanel('chat')">${t('cancel')}</button><button class="btn-save" id="saveBtn" onclick="saveConfig()">${t('save')}</button></div>`;
+    html += `<div class="settings-status" id="settingsStatus"></div>`;
+    html += '</div>'; // close API collapsible
+    html += '</div>';
+
+    // Channel Connections Section
+    html += `<div class="settings-section"><h3>${t('channelConnect')}</h3><p style="font-size:12px;color:#555;margin:-4px 0 14px">${t('channelDesc')}</p><div id="channelCards">加载中…</div></div>`;
+
+    // About Section
+    html += `<div class="settings-section"><h3>${t('about')}</h3>
+      <div class="settings-row"><div><div class="settings-label">史佚 ShiYi</div><div class="settings-desc">版本 ${d.version || '?'} · 记忆型对话引擎</div></div></div>
+    </div>`;
+
+    container.innerHTML = html;
+
+    // Restore state
+    if (d.main.model) { cfgState.main.model = d.main.model; }
+    if (d.embedding.model) { cfgState.emb.model = d.embedding.model; }
+    if (d.light.model) { cfgState.light.model = d.light.model; }
+    if (d.fallback && d.fallback.model) { cfgState.fb.model = d.fallback.model; cfgState.fb.enabled = true; }
+
+    initModels();
+    loadChannels();
+  } catch(e) { container.innerHTML = '<div style="color:#e44;padding:20px">加载设置失败</div>'; }
+}
+
+function providerOpts(module) {
+  if (module === 'fb') return Object.keys(PROVIDERS).map(k=>({key:k,name:k})).concat([{key:'custom',name:t('custom')}]);
+  if (module === 'light') {
+    const mn = cfgState.main.provider;
+    return [{key:'follow', name:t('followMain')+' ('+mn+')'}].concat(Object.keys(PROVIDERS).map(k=>({key:k,name:k}))).concat([{key:'custom',name:t('custom')}]);
+  }
+  return Object.keys(PROVIDERS).map(k=>({key:k,name:k})).concat([{key:'custom',name:t('custom')}]);
+}
+
+function buildDrop(module) {
+  const drop = document.getElementById(module+'-drop');
+  if (!drop) return;
+  const st = cfgState[module];
+  const opts = providerOpts(module);
+  drop.innerHTML = opts.map(o => {
+    const sel = (st.provider===o.key ? ' selected' : '');
+    if (o.key==='custom') return `<div class="pvd-opt${sel}" onclick="selectPvd('${module}','custom')"><span class="opt-name">${t('custom')}</span><span class="opt-url" style="color:#555">${t('manualApiUrl')}</span></div>`;
+    if (o.key==='follow') return `<div class="pvd-opt${sel}" onclick="selectPvd('${module}','follow')"><span class="opt-name">${o.name}</span></div>`;
+    const p = PROVIDERS[o.key];
+    if (!p) return '';
+    const typeDesc = module==='emb' ? (p.emb_models ? t('modelDescEmb') : '') : t('modelDescLLM');
+    return `<div class="pvd-opt${sel}" onclick="selectPvd('${module}','${o.key}')"><div class="opt-name">${o.key}</div><div class="opt-url">${p.base_url}</div></div>`;
+  }).join('');
+}
+
+function togglePvd(module) {
+  document.querySelectorAll('.pvd-drop.open').forEach(d => { if (d.id!==module+'-drop') d.classList.remove('open'); });
+  buildDrop(module);
+  document.getElementById(module+'-drop').classList.toggle('open');
+}
+
+function selectPvd(module, key) {
+  const nameEl = document.getElementById(module+'-pvd-name');
+  const st = cfgState[module];
+  st.provider = key;
+  if (module === 'fb') { st.enabled = true; }
+
+  if (key==='follow') {
+    const mn = cfgState.main.provider;
+    nameEl.textContent = t('followMain')+' ('+mn+')';
+    st.custom=false; st.customUrl='';
+    document.getElementById(module+'-custom').value='0';
+    document.getElementById(module+'-custom-url').value='';
+    document.getElementById(module+'-detail').innerHTML = `<div class="detail-row"><span class="detail-lbl">${t('apiUrl')}</span><span class="detail-val" id="${module}-url">${t('followMainModels')}</span></div><div class="detail-row"><span class="detail-lbl">${t('modelType')}</span><span class="detail-val" id="${module}-models">${t('modelDescLight')}</span></div>`;
+  } else if (key==='custom') {
+    nameEl.textContent = t('custom');
+    st.custom=true; st.customUrl='';
+    document.getElementById(module+'-custom').value='1';
+    document.getElementById(module+'-detail').innerHTML = `<div class="detail-row"><span class="detail-lbl">${t('apiUrl')}</span><input class="detail-input" id="${module}-custom-url-input" placeholder="https://..." onchange="cfgState.${module}.customUrl=this.value;document.getElementById('${module}-custom-url').value=this.value"></div>`;
+  } else {
+    nameEl.textContent = key;
+    st.custom=false; st.customUrl='';
+    document.getElementById(module+'-custom').value='0';
+    document.getElementById(module+'-custom-url').value='';
+    const p = PROVIDERS[key];
+    const typeDesc = module==='emb' ? t('modelDescEmb') : t('modelDescLLM');
+    document.getElementById(module+'-detail').innerHTML = `<div class="detail-row"><span class="detail-lbl">${t('apiUrl')}</span><span class="detail-val" id="${module}-url">${p.base_url}</span></div><div class="detail-row"><span class="detail-lbl">${t('modelType')}</span><span class="detail-val" id="${module}-models">${typeDesc}</span></div>`;
+  }
+  document.getElementById(module+'-drop').classList.remove('open');
+  updateModelSelect(module);
+  if (module==='main') onMainProviderChange();
+}
+
+function updateModelSelect(module) {
+  const sel = document.getElementById(module+'-model');
+  if (!sel) return;
+  const st = cfgState[module];
+  let models = [];
+  if (module==='emb') {
+    const p = PROVIDERS[st.provider];
+    if (st.provider==='custom') { sel.innerHTML = `<option value="">${t('customPlaceholder')}</option>`; return; }
+    if (p && p.emb_models) models = p.emb_models;
+  } else if (module==='light' && st.provider==='follow') {
+    const mp = PROVIDERS[cfgState.main.provider];
+    if (mp) models = mp.models.slice();
+  } else if (st.provider==='custom') {
+    sel.innerHTML = `<option value="">${t('customPlaceholder')}</option>`; return;
+  } else {
+    const p = PROVIDERS[st.provider]; if (p) models = p.models;
+  }
+  const prev = st.model;
+  sel.innerHTML = models.map(m => {
+    let label = m;
+    if (module==='light' && st.provider!=='custom') {
+      let pk = st.provider==='follow' ? cfgState.main.provider : st.provider;
+      const mp = PROVIDERS[pk];
+      if (mp && m===mp.fast) label = m + ' ('+t('recommended')+')';
+    }
+    return `<option value="${m}"${m===prev?' selected':''}>${label}</option>`;
+  }).join('') + '<option value="custom">'+t('custom')+'</option>';
+  if (module==='light' && st.provider==='follow') {
+    const mp = PROVIDERS[cfgState.main.provider];
+    if (mp && mp.fast) { sel.value = mp.fast; st.model = mp.fast; }
+  }
+}
+
+function onMainProviderChange() {
+  if (cfgState.light.provider==='follow') {
+    document.getElementById('light-pvd-name').textContent = t('followMain')+' ('+cfgState.main.provider+')';
+    updateModelSelect('light');
+  }
+}
+
+function toggleFallback(e) {
+  if (e && (e.target.closest('.pvd-btn') || e.target.closest('.pvd-drop'))) return;
+  const b = document.getElementById('fb-body'), a = document.getElementById('fb-arr');
+  b.classList.toggle('open'); a.textContent = b.classList.contains('open')?'▼':'▶';
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.pvd-btn') && !e.target.closest('.pvd-drop'))
+    document.querySelectorAll('.pvd-drop.open').forEach(d=>d.classList.remove('open'));
+});
+
+function initModels() { updateModelSelect('main'); updateModelSelect('emb'); updateModelSelect('light'); updateModelSelect('fb'); }
+
+// ═══════════════════════════════════════
+// Channel Connections
+// ═══════════════════════════════════════
+let channelData = {};
+
+async function loadChannels() {
+  const container = document.getElementById('channelCards');
+  if (!container) return;
+  try {
+    const r = await fetch('/api/channels'); channelData = await r.json();
+    let html = '';
+    for (const [chId, ch] of Object.entries(channelData)) {
+      const configured = ch.fields.length > 0 && ch.fields.some(f => f.value_set);
+      const noFields = ch.fields.length === 0;
+      const statusBadge = noFields
+        ? `<span style="font-size:10px;padding:3px 10px;border-radius:10px;background:#1a1a1a;color:#555;border:1px solid #252525">${t('channelComingSoon')}</span>`
+        : configured
+          ? `<span style="font-size:10px;padding:3px 10px;border-radius:10px;background:#0a2a0a;color:#4c4;border:1px solid #1a4a1a">${t('channelConfigured')}</span>`
+          : `<span style="font-size:10px;padding:3px 10px;border-radius:10px;background:#1a1a1a;color:#666;border:1px solid #252525">${t('channelNotConfigured')}</span>`;
+
+      html += `<div class="ch-card" id="ch-${chId}">`;
+      html += `<div class="ch-header" onclick="${noFields?'':`toggleChannel('${chId}')`}">
+        <span style="font-size:22px">${ch.icon}</span>
+        <span style="font-size:14px;font-weight:600;color:#e4e4e4;flex:1">${ch.name}</span>
+        ${statusBadge}
+        <span id="ch-arr-${chId}" style="font-size:9px;color:#555;transition:transform .2s">${noFields?'':'▶'}</span>
+      </div>`;
+      html += `<div class="ch-body" id="ch-body-${chId}" style="display:none">`;
+      if (noFields) {
+        html += `<p style="font-size:12px;color:#555">${t('channelComingSoon')}</p>`;
+      } else {
+        for (const f of ch.fields) {
+          const ph = f.secret ? (f.value_set ? t('channelConfigured') : f.placeholder) : (f.value_set ? f.value : f.placeholder);
+          html += `<div style="margin-top:12px"><div style="font-size:12px;color:#888;margin-bottom:6px">${f.label}${f.secret && f.value_set ? ' <span style="color:#4c4;font-size:10px">✓</span>' : ''}</div>`;
+          html += `<input type="${f.secret?'password':'text'}" id="ch-${chId}-${f.key}" placeholder="${ph}" style="width:100%;padding:10px 12px;background:#1c1c1c;border:1px solid #1f1f1f;border-radius:8px;color:#d4d4d4;font-size:12px;font-family:monospace;outline:none"></div>`;
+        }
+        if (ch.scopes && ch.scopes.length > 0) {
+          html += `<div style="margin-top:14px"><div style="font-size:12px;color:#888;margin-bottom:8px">${t('channelRequiredScopes')}</div><div style="display:flex;flex-wrap:wrap;gap:6px">`;
+          for (const s of ch.scopes) {
+            html += `<span style="font-size:11px;padding:3px 10px;border-radius:6px;background:#0a1a2a;color:#7aa2f7;border:1px solid #1a2a4a;font-family:monospace">${s}</span>`;
+          }
+          html += `</div></div>`;
+        }
+        if (ch.event) {
+          html += `<div style="margin-top:10px"><span style="font-size:12px;color:#888">${t('channelEvent')}: </span><span style="font-size:12px;color:#aaa;font-family:monospace">${ch.event}</span></div>`;
+        }
+        // Guide steps - button to open modal
+        if (ch.guide_steps && ch.guide_steps.length > 0) {
+          html += `<div style="margin-top:14px"><button style="width:100%;padding:12px;background:#0d1a2d;border:1px solid #1a2a4a;border-radius:8px;color:#7aa2f7;font-size:13px;cursor:pointer;text-align:center" onclick="showChannelGuide('${chId}')">📖 查看详细配置指南</button></div>`;
+        }
+        // Import JSON for scopes
+        if (ch.import_json) {
+          html += `<div style="margin-top:14px"><div style="font-size:12px;color:#888;margin-bottom:8px">批量导入权限 JSON（复制到飞书权限管理→批量导入→应用身份权限）</div>`;
+          html += `<div style="position:relative"><pre style="background:#0d0d0d;padding:12px;border-radius:8px;font-size:11px;color:#aaa;overflow-x:auto;border:1px solid #222;font-family:Monaco,monospace;white-space:pre-wrap;word-break:break-all">${ch.import_json}</pre>`;
+          html += `<button style="position:absolute;top:8px;right:8px;background:#2a2a2a;border:1px solid #333;color:#888;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('pre').textContent);this.textContent='已复制';setTimeout(()=>this.textContent='复制',1500)">复制</button></div></div>`;
+        }
+        html += `<div style="display:flex;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid #222">`;
+        html += `<button class="btn-primary" style="padding:10px 18px;border-radius:8px;font-size:13px;cursor:pointer;border:none" onclick="saveChannel('${chId}')">${t('channelSave')}</button>`;
+        html += `<button class="btn-secondary" style="padding:10px 18px;border-radius:8px;font-size:13px;cursor:pointer" onclick="testChannel('${chId}')" id="ch-test-${chId}">${t('channelTest')}</button>`;
+        html += `</div>`;
+        html += `<div id="ch-status-${chId}" style="margin-top:10px;padding:8px;border-radius:6px;font-size:12px;text-align:center;display:none"></div>`;
+      }
+      html += `</div></div>`;
+    }
+    container.innerHTML = html;
+  } catch(e) { container.innerHTML = `<p style="color:#e44;font-size:12px">加载渠道失败: ${e.message}</p>`; }
+}
+
+function toggleChannel(chId) {
+  const body = document.getElementById('ch-body-' + chId);
+  const arr = document.getElementById('ch-arr-' + chId);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (arr) arr.style.transform = open ? '' : 'rotate(90deg)';
+}
+
+async function saveChannel(chId) {
+  const ch = channelData[chId];
+  if (!ch) return;
+  const config = {};
+  for (const f of ch.fields) {
+    const input = document.getElementById(`ch-${chId}-${f.key}`);
+    if (input) config[f.key] = input.value.trim();
+  }
+  try {
+    const r = await fetch('/api/channels', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({channel: chId, config}),
+    });
+    const d = await r.json();
+    const statusEl = document.getElementById('ch-status-' + chId);
+    if (r.ok && d.status === 'ok') {
+      if (statusEl) { statusEl.textContent = t('channelSaved'); statusEl.className = ''; statusEl.style.cssText = 'margin-top:10px;padding:8px;border-radius:6px;font-size:12px;text-align:center;background:#0a2a0a;color:#4c4;border:1px solid #1a4a1a'; }
+    } else {
+      if (statusEl) { statusEl.textContent = d.message || t('channelSaveFail'); statusEl.style.cssText = 'margin-top:10px;padding:8px;border-radius:6px;font-size:12px;text-align:center;background:#2a0a0a;color:#e44;border:1px solid #4a1a1a'; }
+    }
+  } catch(e) {
+    const statusEl = document.getElementById('ch-status-' + chId);
+    if (statusEl) { statusEl.textContent = e.message; statusEl.style.cssText = 'margin-top:10px;padding:8px;border-radius:6px;font-size:12px;text-align:center;background:#2a0a0a;color:#e44;border:1px solid #4a1a1a'; }
+  }
+}
+
+async function testChannel(chId) {
+  const btn = document.getElementById('ch-test-' + chId);
+  const statusEl = document.getElementById('ch-status-' + chId);
+  if (!btn) return;
+  await saveChannel(chId);
+  btn.disabled = true; btn.textContent = t('channelTesting');
+  try {
+    const r = await fetch(`/api/channels/${chId}/test`);
+    const d = await r.json();
+    if (statusEl) {
+      statusEl.style.cssText = `margin-top:10px;padding:8px;border-radius:6px;font-size:12px;text-align:center;background:${d.status==='ok'?'#0a2a0a':'#2a0a0a'};color:${d.status==='ok'?'#4c4':'#e44'};border:1px solid ${d.status==='ok'?'#1a4a1a':'#4a1a1a'}`;
+      statusEl.textContent = d.message;
+    }
+    // 测试成功后更新状态标签为"已配置"
+    if (d.status === 'ok') {
+      const card = document.getElementById('ch-' + chId);
+      if (card) {
+        const badge = card.querySelector('.ch-header span[style*="border-radius:10px"]');
+        if (badge) {
+          badge.textContent = t('channelConfigured');
+          badge.style.cssText = 'font-size:10px;padding:3px 10px;border-radius:10px;background:#0a2a0a;color:#4c4;border:1px solid #1a4a1a';
+        }
+      }
+    }
+  } catch(e) {
+    if (statusEl) { statusEl.textContent = e.message; statusEl.style.cssText = 'margin-top:10px;padding:8px;border-radius:6px;font-size:12px;text-align:center;background:#2a0a0a;color:#e44;border:1px solid #4a1a1a'; }
+  } finally { btn.disabled = false; btn.textContent = t('channelTest'); }
+}
+
+function getUrl(module) {
+  const st = cfgState[module];
+  if (module==='fb' && !st.enabled) return '';
+  if (module==='light' && st.provider==='follow') return '';
+  if (st.custom) {
+    const inp = document.getElementById(module+'-custom-url-input');
+    return inp ? inp.value.trim() : st.customUrl;
+  }
+  const p = PROVIDERS[st.provider];
+  return p ? p.base_url : '';
+}
+
+function getModel(module) {
+  const sel = document.getElementById(module+'-model');
+  if (!sel || sel.value==='custom') return '';
+  return sel.value;
+}
+
+async function saveConfig() {
+  const btn = document.getElementById('saveBtn');
+  const status = document.getElementById('settingsStatus');
+  if (!btn || !status) return;
+  status.className = 'settings-status';
+
+  const mainKey = document.getElementById('main-key').value.trim();
+  const embKey = document.getElementById('emb-key').value.trim();
+  const mainKeyOk = mainKey || document.getElementById('main-key').placeholder.includes(t('keyConfigured'));
+  const embKeyOk = embKey || document.getElementById('emb-key').placeholder.includes(t('keyConfigured'));
+
+  if (!mainKeyOk || !embKeyOk) { status.textContent = t('fillKeys'); status.className = 'settings-status err'; return; }
+  const mainModel = getModel('main'), embModel = getModel('emb'), lightModel = getModel('light');
+  if (!mainModel || !embModel || !lightModel) { status.textContent = t('selectModels'); status.className = 'settings-status err'; return; }
+
+  const lightKey = document.getElementById('light-key').value.trim();
+  const lightUrl = getUrl('light');
+  const fbModel = cfgState.fb.enabled ? getModel('fb') : '';
+  const fbKey = cfgState.fb.enabled ? document.getElementById('fb-key').value.trim() : '';
+  const fbUrl = getUrl('fb');
+
+  btn.disabled = true; btn.textContent = t('saving');
+  try {
+    const payload = {
+      main_key: mainKey, embedding_key: embKey,
+      main_model: mainModel, main_base_url: getUrl('main'),
+      embedding_model: embModel, embedding_base_url: getUrl('emb'),
+      light_model: lightModel, light_key: lightKey, light_base_url: lightUrl,
+      fallback_model: fbModel, fallback_key: fbKey, fallback_base_url: fbUrl,
+    };
+    const res = await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json();
+    if (res.ok && data.status==='ok') {
+      status.textContent = t('saved'); status.className = 'settings-status ok';
+      checkHealth(); // Refresh API status
+      setTimeout(() => switchPanel('chat'), 1000);
+    } else { status.textContent = data.message||data.detail||t('saveFail'); status.className = 'settings-status err'; }
+  } catch(err) { status.textContent = '网络错误: '+err.message; status.className = 'settings-status err'; }
+  finally { btn.disabled = false; btn.textContent = t('save'); }
+}
+
+async function clearCurrentMessages() {
+  if (!currentSessionId) return;
+  try {
+    await fetch(`/api/sessions/${currentSessionId}/messages`, { method:'DELETE' });
+    toast(t('clearOk'), 'ok');
+    await loadMessages();
+    await loadSessions();
+  } catch(e) { toast(t('clearFail'), 'err'); }
+}
+
+// Channel Guide Modal
+function showChannelGuide(chId) {
+  const ch = channelData[chId];
+  if (!ch || !ch.guide_steps) return;
+  let html = `<div style="max-height:70vh;overflow-y:auto;padding:24px">`;
+  html += `<h2 style="font-size:18px;color:#e4e4e4;margin-bottom:20px;display:flex;align-items:center;gap:10px">${ch.icon} ${ch.name} 配置指南</h2>`;
+  for (const s of ch.guide_steps) {
+    html += `<div style="margin-bottom:20px;padding:16px 18px;background:#141414;border:1px solid #222;border-radius:10px">`;
+    html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="background:#2563eb;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">${s.step}</span><strong style="color:#e0e0e0;font-size:14px">${s.title}</strong></div>`;
+    const descLines = s.desc.split('\\n');
+    html += `<div style="font-size:13px;color:#aaa;line-height:1.8;padding-left:34px">`;
+    for (const line of descLines) {
+      if (line.startsWith('⚠️')) {
+        html += `<div style="color:#eab308;margin-top:6px">${line}</div>`;
+      } else {
+        html += `<div>${line}</div>`;
+      }
+    }
+    html += `</div></div>`;
+  }
+  // Import JSON
+  if (ch.import_json) {
+    html += `<div style="margin-top:8px;padding:16px 18px;background:#141414;border:1px solid #222;border-radius:10px">`;
+    html += `<div style="font-size:14px;color:#e0e0e0;font-weight:600;margin-bottom:10px">📋 批量导入权限 JSON</div>`;
+    html += `<div style="font-size:12px;color:#888;margin-bottom:10px">复制以下 JSON，粘贴到飞书权限管理 → 批量导入 → 应用身份权限</div>`;
+    html += `<div style="position:relative"><pre style="background:#0a0a0a;padding:14px;border-radius:8px;font-size:11px;color:#aaa;overflow-x:auto;border:1px solid #1a1a1a;font-family:Monaco,monospace;white-space:pre-wrap;word-break:break-all">${ch.import_json}</pre>`;
+    html += `<button style="position:absolute;top:10px;right:10px;background:#2a2a2a;border:1px solid #333;color:#ccc;padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('pre').textContent);this.textContent='已复制 ✓';setTimeout(()=>this.textContent='复制 JSON',2000)">复制 JSON</button></div>`;
+    html += `</div>`;
+  }
+  html += `</div>`;
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
+
+// ═══════════════════════════════════════
+// Init
+// ═══════════════════════════════════════
+(async function init() {
+  applyLang();
+  await loadSessions();
+  if (sessions.length > 0) {
+    currentSessionId = sessions[0].id;
+    currentSessionName = sessions[0].name;
+    renderSessions();
+    await loadMessages();
+  } else {
+    renderWelcome(document.getElementById('messages'));
+  }
+})();
+</script>
+
+<!-- 创建吏员弹窗 -->
+<div id="createClerkModal" class="modal-overlay" style="display:none">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <h3>创建吏员</h3>
+      <button class="icon-btn" onclick="hideCreateClerkModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px">
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">名称 *</label>
+        <input id="ccName" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:14px" placeholder="如：法律顾问、数据分析师">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">描述</label>
+        <input id="ccDesc" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:14px" placeholder="一句话说明吏员用途">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">工具（每行一个工具名，可选）</label>
+        <textarea id="ccTools" rows="3" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:13px;resize:vertical" placeholder="如：\n搜索法律\n审查合同"></textarea>
+        <div style="font-size:11px;color:#555;margin-top:4px">吏员可执行的操作。每行一个名称，创建后会自动生成对应的工具接口。</div>
+      </div>
+      <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="ccNeedsLLM" style="accent-color:#7aa2f7" onchange="var v=this.checked?'block':'none';document.getElementById('ccModelRow').style.display=v;document.getElementById('ccProviderRow').style.display=v;document.getElementById('ccBaseUrlRow').style.display=v">
+        <label for="ccNeedsLLM" style="font-size:13px;color:#aaa">吏员内部需要调用大模型</label>
+      </div>
+      <div style="font-size:11px;color:#555;margin-top:-8px;margin-bottom:14px;margin-left:26px">勾选后吏员可独立调用 LLM 执行复杂推理。需在下方配置模型和 API Key。</div>
+      <div id="ccModelRow" style="display:none;margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">模型</label>
+        <input id="ccModelName" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:14px" placeholder="如：deepseek-chat, gpt-4o">
+      </div>
+      <div id="ccProviderRow" style="display:none;margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">Provider</label>
+        <input id="ccProvider" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:14px" placeholder="如：deepseek, openai（默认 deepseek）">
+      </div>
+      <div id="ccBaseUrlRow" style="display:none;margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">API Base URL</label>
+        <input id="ccBaseUrl" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:14px" placeholder="如：https://api.deepseek.com/v1（默认 DeepSeek）">
+      </div>
+      <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="ccNeedsAPI" style="accent-color:#7aa2f7" onchange="document.getElementById('ccAPIKeysRow').style.display=this.checked?'flex':'none'">
+        <label for="ccNeedsAPI" style="font-size:13px;color:#aaa">需要外部 API Key</label>
+      </div>
+      <div style="font-size:11px;color:#555;margin-top:-8px;margin-bottom:14px;margin-left:26px">吏员调用第三方 API（如 OpenAI、飞书等）时需要的密钥名称。创建后可在吏员详情页填入实际值。</div>
+      <div id="ccAPIKeysRow" style="display:none;margin-bottom:14px;align-items:center;gap:8px">
+        <label style="font-size:12px;color:#888;white-space:nowrap">Key 名称</label>
+        <input id="ccAPIKeyNames" style="flex:1;padding:8px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:13px" placeholder="如：OPENAI_API_KEY（逗号分隔多个）">
+      </div>
+    </div>
+    <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #1a1a1a">
+      <button onclick="hideCreateClerkModal()" style="padding:8px 20px;border-radius:8px;border:1px solid #333;background:transparent;color:#888;cursor:pointer">取消</button>
+      <button onclick="submitCreateClerk()" style="padding:8px 20px;border-radius:8px;border:none;background:#7aa2f7;color:#111;cursor:pointer;font-weight:600">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- 吏员更名弹窗 -->
+<div id="renameClerkModal" class="modal-overlay" style="display:none">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-header">
+      <h3>更名吏员</h3>
+      <button class="icon-btn" onclick="document.getElementById('renameClerkModal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px">
+      <input id="rcNewName" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:14px" placeholder="新名称">
+    </div>
+    <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #1a1a1a">
+      <button onclick="document.getElementById('renameClerkModal').style.display='none'" style="padding:8px 20px;border-radius:8px;border:1px solid #333;background:transparent;color:#888;cursor:pointer">取消</button>
+      <button onclick="submitRenameClerk()" style="padding:8px 20px;border-radius:8px;border:none;background:#7aa2f7;color:#111;cursor:pointer;font-weight:600">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- 吏员技能分配弹窗 -->
+<div id="assignSkillsModal" class="modal-overlay" style="display:none">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-header">
+      <h3>分配技能</h3>
+      <button class="icon-btn" onclick="document.getElementById('assignSkillsModal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px" id="assignSkillsBody">
+    </div>
+    <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #1a1a1a">
+      <button onclick="document.getElementById('assignSkillsModal').style.display='none'" style="padding:8px 20px;border-radius:8px;border:1px solid #333;background:transparent;color:#888;cursor:pointer">取消</button>
+      <button onclick="submitAssignSkills()" style="padding:8px 20px;border-radius:8px;border:none;background:#7aa2f7;color:#111;cursor:pointer;font-weight:600">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 吏员配置弹窗 -->
+<div id="configureClerkModal" class="modal-overlay" style="display:none">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <h3>吏员配置</h3>
+      <button class="icon-btn" onclick="document.getElementById('configureClerkModal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px">
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">描述</label>
+        <input id="cfgDesc" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:14px">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">API Base URL</label>
+        <input id="cfgBaseUrl" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:14px" placeholder="如：https://api.deepseek.com/v1">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">模型</label>
+        <input id="cfgModelName" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:14px" placeholder="如：deepseek-chat, gpt-4o">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">工具（每行一个工具名）</label>
+        <textarea id="cfgTools" rows="3" style="width:100%;padding:10px 12px;background:#0d0d0d;border:1px solid #222;border-radius:8px;color:#ccc;font-size:13px;resize:vertical"></textarea>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">已分配技能</label>
+        <div id="cfgSkillsContainer" style="max-height:200px;overflow-y:auto"></div>
+      </div>
+      <div id="cfgAPIKeysContainer" style="margin-bottom:14px"></div>
+      <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="cfgNeedsLLM" style="accent-color:#7aa2f7">
+        <label for="cfgNeedsLLM" style="font-size:13px;color:#aaa">吏员内部需要调用大模型</label>
+      </div>
+    </div>
+    <div class="modal-footer" style="padding:14px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #1a1a1a">
+      <button onclick="document.getElementById('configureClerkModal').style.display='none'" style="padding:8px 20px;border-radius:8px;border:1px solid #333;background:transparent;color:#888;cursor:pointer">取消</button>
+      <button onclick="submitConfigureClerk()" style="padding:8px 20px;border-radius:8px;border:none;background:#7aa2f7;color:#111;cursor:pointer;font-weight:600">保存</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
