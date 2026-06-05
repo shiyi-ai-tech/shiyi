@@ -1,0 +1,24 @@
+[Unit]
+Description=Shiyi AI Agent - WebUI
+After=network.target
+
+[Service]
+Type=simple
+User=%i
+ExecStart=/usr/bin/env python -m shiyi.shell.webui
+Restart=on-failure
+RestartSec=5
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+WorkingDirectory=%h/.shiyi
+Environment=PYTHONUNBUFFERED=1
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=%h/.shiyi
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

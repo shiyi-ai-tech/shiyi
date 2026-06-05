@@ -1,0 +1,23 @@
+[Unit]
+Description=Shiyi AI Agent - WeChat Gateway
+After=network.target
+
+[Service]
+Type=simple
+User=%i
+ExecStart=/usr/bin/env python -m shiyi.shell.gateway.run wechat
+Restart=on-failure
+RestartSec=10
+StartLimitBurst=5
+StartLimitIntervalSec=120
+
+WorkingDirectory=%h/.shiyi
+Environment=PYTHONUNBUFFERED=1
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=%h/.shiyi
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target
