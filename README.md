@@ -144,8 +144,8 @@ From the beginning and throughout development, ShiYi prioritizes usability for r
 
 ```bash
 # Clone the repo
-git clone https://github.com/anty0418/shiyi-tongxun.git
-cd shiyi-tongxun
+git clone https://github.com/shiyi-ai-tech/shiyi.git
+cd shiyi
 
 # Install dependencies
 pip install -e ./shiyi-common
@@ -194,7 +194,7 @@ SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
 ### Four-Package Layout
 
 ```
-shiyi-tongxun/
+shiyi/
 ├── shiyi-common/       # Shared types and interfaces (Fragment, Intent, Provider protocols)
 ├── shiyi-providers/    # External providers (LLM, Embedding, MCP)
 ├── shiyi-core/         # Core engine (memory, perception, decision, clerk scheduling)

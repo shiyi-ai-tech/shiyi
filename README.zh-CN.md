@@ -157,8 +157,8 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/anty0418/shiyi-tongxun.git
-cd shiyi-tongxun
+git clone https://github.com/shiyi-ai-tech/shiyi.git
+cd shiyi
 
 # 安装依赖
 pip install -e ./shiyi-common
@@ -207,7 +207,7 @@ SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
 ### 四包结构
 
 ```
-shiyi-tongxun/
+shiyi/
 ├── shiyi-common/       # 公共类型与接口（Fragment、Intent、Provider协议）
 ├── shiyi-providers/    # 外部服务提供商（LLM、Embedding、MCP）
 ├── shiyi-core/         # 核心引擎（记忆、感知、决策、吏员调度）
